@@ -132,7 +132,7 @@ nlevels(factor(synchrony_axis$Axis)) # 7
 sum(is.na(synchrony_axis))
 
 ###save results
-write.csv(synchrony_axis, "output_data/02_funcgroup_traitgroup_withinsite_ordination_interpolated.csv")
+write.csv(synchrony_axis, "output_data/sync/02_funcgroup_traitgroup_withinsite_ordination_interpolated.csv")
 
 
 # between basin sites - within biogeogrpahic region -----------------------
@@ -229,7 +229,7 @@ unique(synchrony_axis$Axis)
 sum(is.na(synchrony_axis))
 
 ###save results
-write.csv(synchrony_axis, "output_data/02_funcgroup_traitgroup_between_all_sites_ordination_biogeographic_regions_interpolated.csv")
+write.csv(synchrony_axis, "output_data/sync/02_funcgroup_traitgroup_between_all_sites_ordination_biogeographic_regions_interpolated.csv")
 
 
 # Leaving one year out ----------------------------------------------------
@@ -314,12 +314,12 @@ ax=1
   }
   synchrony_axis<-data.frame(synchrony_axis)
   colnames(synchrony_axis)<-c("Region", "Axis","TraitGroup", "Correlation","Site_ID1","Site_ID2", "YearRemoved")
-  save(synchrony_axis, file=paste0("output_data/02_", paste(regionsID[region]), "_ordination_interpolated_site_sync_one_out.RData", sep=""))
+  save(synchrony_axis, file=paste0("output_data/sync/02_", paste(regionsID[region]), "_ordination_interpolated_site_sync_one_out.RData", sep=""))
   rm(synchrony_axis)
 }
 
 
 
-load(file= "output_data/02_Europe_ordination_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_Europe_ordination_interpolated_site_sync_one_out.RData")
 head(synchrony_axis)
 unique(synchrony_axis$TraitGroup)

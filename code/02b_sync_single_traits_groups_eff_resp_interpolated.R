@@ -128,7 +128,7 @@ nlevels(factor(synchrony_axis$Trait)) # 7
 sum(is.na(synchrony_axis))
 
 ###save results
-write.csv(synchrony_axis, "output_data/02_funcgroup_traitgroup_withinsite_single_traits_interpolated.csv")
+write.csv(synchrony_axis, "output_data/sync/02_funcgroup_traitgroup_withinsite_single_traits_interpolated.csv")
 
 
 # between basin sites - within biogeogrpahic region -----------------------
@@ -228,7 +228,7 @@ nlevels(factor(synchrony_axis$Trait)) # 7
 sum(is.na(synchrony_axis))
 
 ###save results
-write.csv(synchrony_axis, "output_data/02_funcgroup_traitgroup_between_all_sites_single_traits_biogeographic_regions_interpolated.csv")
+write.csv(synchrony_axis, "output_data/sync/02_funcgroup_traitgroup_between_all_sites_single_traits_biogeographic_regions_interpolated.csv")
 
 # test <- synchrony_axis %>% filter(Pair == "S7990.S7991")
 # test
@@ -318,7 +318,7 @@ for (region in 1:length(regionsID)) {
   }
   synchrony_axis<-data.frame(synchrony_axis)
   colnames(synchrony_axis)<-c("Region","Trait","TraitGroup", "Correlation","Site_ID1","Site_ID2", "YearRemoved")
-  save(synchrony_axis, file=paste0("output_data/02_", paste(regionsID[region]), "_single_traits_interpolated_site_sync_one_out.RData", sep=""))
+  save(synchrony_axis, file=paste0("output_data/sync/02_", paste(regionsID[region]), "_single_traits_interpolated_site_sync_one_out.RData", sep=""))
   rm(synchrony_axis)
 }
 
@@ -422,7 +422,7 @@ nlevels(factor(synchrony_axis$Trait)) # 7
 sum(is.na(synchrony_axis))
 
 ###save results
-write.csv(synchrony_axis, "output_data/02_temperature_between_all_sites_biogeographic_regions.csv")
+write.csv(synchrony_axis, "output_data/sync/02_temperature_between_all_sites_biogeographic_regions.csv")
 
 
 # Flow synchrony ----------------------------------------------------------
@@ -526,7 +526,7 @@ nlevels(factor(synchrony_axis$Trait)) # 7
 sum(is.na(synchrony_axis))
 
 ###save results
-write.csv(synchrony_axis, "output_data/02_flow_between_all_sites_biogeographic_regions.csv")
+write.csv(synchrony_axis, "output_data/sync/02_flow_between_all_sites_biogeographic_regions.csv")
 
 
 # Leave one out - Environment ---------------------------------------------
@@ -631,7 +631,7 @@ for (region in 1:length(regionsID)) {
   }
   synchrony_axis<-data.frame(synchrony_axis)
   colnames(synchrony_axis)<-c("Region","env_var", "Correlation","Site_ID1","Site_ID2", "YearRemoved")
-  save(synchrony_axis, file=paste0("output_data/02_", paste(regionsID[region]), "_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData", sep=""))
+  save(synchrony_axis, file=paste0("output_data/sync/02_", paste(regionsID[region]), "_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData", sep=""))
   rm(synchrony_axis)
 }
 
@@ -740,11 +740,11 @@ for (region in 1:length(regionsID)) {
   }
   synchrony_axis<-data.frame(synchrony_axis)
   colnames(synchrony_axis)<-c("Region","env_var", "Correlation","Site_ID1","Site_ID2", "YearRemoved")
-  save(synchrony_axis, file=paste0("output_data/02_", paste(regionsID[region]), "_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData", sep=""))
+  save(synchrony_axis, file=paste0("output_data/sync/02_", paste(regionsID[region]), "_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData", sep=""))
   rm(synchrony_axis)
 }
 
-load(file = "output_data/02_Europe_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file = "output_data/sync/02_Europe_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 
 
 nlevels(factor(synchrony_axis$basin_ID)) # 43
