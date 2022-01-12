@@ -7,6 +7,7 @@
 3 - 02a_sync_trait_ord_groups_eff_resp_interpolated.R
 4 - 02b_sync_single_traits_groups_eff_resp_interpolated.R
 5 - 03a_dummy_connectivity_variable_interpolated.R
+6 - 04_differences_in_synchrony.R
 
 
 # 01a_trait_ordination_interpolated_abundances.R
@@ -38,3 +39,7 @@ also includes synchrony calculation for temperature and flow
 
 calculates distances and connectivity variable
 joins to all synchrony datasets
+
+## 04_differences_in_synchrony.R
+
+calculates the differences in synchrony from the calculation of using all years and the jack knife leave one out (LOO)
