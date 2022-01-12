@@ -3,15 +3,15 @@ library(tidyverse)
 library(tidyr)
 
 ## interpolated single traits
-syncDF <- read.csv("output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+syncDF <- read.csv("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
 
-load(file= "output_data/02_Oceania_single_traits_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_Oceania_single_traits_interpolated_site_sync_one_out.RData")
 oc_sync <- synchrony_axis
 
-load(file= "output_data/02_USA_single_traits_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_USA_single_traits_interpolated_site_sync_one_out.RData")
 usa_sync <- synchrony_axis
 
-load(file= "output_data/02_Europe_single_traits_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_Europe_single_traits_interpolated_site_sync_one_out.RData")
 eu_sync <- synchrony_axis
 
 
@@ -52,20 +52,20 @@ interDF_join <- left_join(interDF, syncDF, by=c("Region", "Trait", "TraitGroup",
 head(interDF_join)
 sum(is.na(interDF_join))
 
-write.csv(interDF_join, "output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.csv")
+write.csv(interDF_join, "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.csv")
 
 
 #### interpolated ordination 
-syncDF <- read.csv("output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination.csv")
+syncDF <- read.csv("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination.csv")
 head(syncDF)
 
-load(file= "output_data/02_Oceania_ordination_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_Oceania_ordination_interpolated_site_sync_one_out.RData")
 oc_sync <- synchrony_axis
 
-load(file= "output_data/02_USA_ordination_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_USA_ordination_interpolated_site_sync_one_out.RData")
 usa_sync <- synchrony_axis
 
-load(file= "output_data/02_Europe_ordination_interpolated_site_sync_one_out.RData")
+load(file= "output_data/sync/02_Europe_ordination_interpolated_site_sync_one_out.RData")
 eu_sync <- synchrony_axis
 head(synchrony_axis)
 unique(synchrony_axis$TraitGroup)
@@ -95,7 +95,9 @@ sum(is.na(interDF))
 dim(interDF_join)
 interDF_join <- distinct(interDF_join)
 
-write.csv(interDF_join, "output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.csv")
+write.csv(interDF_join, "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.csv")
+
+# Calculate differences in synchrony --------------------------------------
 
 
 
@@ -103,15 +105,15 @@ write.csv(interDF_join, "output_data/03_sync_data_funcgroup_traitgroup_similarit
 
 ## flow
 
-syncDF <- read.csv("output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+syncDF <- read.csv("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
 
-load(file= "output_data/02_Oceania_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file= "output_data/sync/02_Oceania_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 oc_sync <- synchrony_axis
 
-load(file= "output_data/02_USA_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file= "output_data/sync/02_USA_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 usa_sync <- synchrony_axis
 
-load(file= "output_data/02_Europe_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file= "output_data/sync/02_Europe_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 eu_sync <- synchrony_axis
 
 
@@ -150,20 +152,20 @@ interDF_join <- interDF_join %>%
 head(interDF_join)
 sum(is.na(interDF_join))
 
-write.csv(interDF_join, "output_data/03_sync_data_funcgroup_flow_similarity_euclidean_dist_interpolated_LOO.csv")
+write.csv(interDF_join, "output_data/sync/03_sync_data_funcgroup_flow_similarity_euclidean_dist_interpolated_LOO.csv")
 
 ## temperature
 
 ## interpolated single traits
-syncDF <- read.csv("output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+syncDF <- read.csv("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
 
-load(file= "output_data/02_Oceania_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file= "output_data/sync/02_Oceania_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 oc_sync <- synchrony_axis
 
-load(file= "output_data/02_USA_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file= "output_data/sync/02_USA_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 usa_sync <- synchrony_axis
 
-load(file= "output_data/02_Europe_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+load(file= "output_data/sync/02_Europe_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
 eu_sync <- synchrony_axis
 
 
@@ -205,5 +207,5 @@ interDF_join <- interDF_join %>%
 head(interDF_join)
 sum(is.na(interDF_join))
 
-write.csv(interDF_join, "output_data/03_sync_data_funcgroup_temp_similarity_euclidean_dist_interpolated_LOO.csv")
+write.csv(interDF_join, "output_data/sync/03_sync_data_funcgroup_temp_similarity_euclidean_dist_interpolated_LOO.csv")
 

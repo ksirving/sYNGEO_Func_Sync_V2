@@ -6,21 +6,23 @@ library(ggplot2)
 library(dplyr)
 library(tidyverse)
 
+getwd()
+
 ## upload fish abundance and site data
 originaldata <- read.csv("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv")
 head(originaldata)
 
+## take only sites and basins
 sites <- originaldata %>%
   dplyr::select(SiteID, HydroBasin) %>%
   distinct()
 
 ## all site synchrony
 
-sync <- read.csv("output_data/02_funcgroup_traitgroup_between_all_sites_single_traits_biogeographic_regions_interpolated.csv")
+sync <- read.csv("output_data/sync/02_funcgroup_traitgroup_between_all_sites_single_traits_biogeographic_regions_interpolated.csv")
 head(sync)
 
 ## join first site basin
-# ?left_join
 site1 <- left_join(sync, sites, by = c("Site_ID1" = "SiteID"))
 head(site1)
 
@@ -47,23 +49,14 @@ con <- site2 %>%
 
 head(con)
 
-write.csv(con, "output_data/03_all_sync_by_groups_bioreg_connectivity_interpolated.csv")
+write.csv(con, "output_data/sync/03_all_sync_by_groups_bioreg_connectivity_interpolated.csv")
 
-
+rm(con)
 # calculate distance ------------------------------------------------------
 
-## no boundaries
 
-sync <- read.csv("output_data/03_all_sync_by_groups_bioreg_connectivity_interpolated.csv")
+sync <- read.csv("output_data/sync/03_all_sync_by_groups_bioreg_connectivity_interpolated.csv")
 head(sync)
-dim(sync)
-mean(na.omit(sync$Correlation))
-sum(na.omit(sync$Correlation))
-length(unique(sync$Pair))
-## site coords
-
-fish_ab <- read.csv("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv")
-head(fish_ab)
 
 ## define pairs
 syncsites <- sync %>%
@@ -75,17 +68,23 @@ syncsites <- sync %>%
   # dplyr::select(-FeedingGroup, ) %>%
   distinct()
 
+head(syncsites)
+
 pairs <- unique(syncsites$Pair)
 tail(pairs)
 length(pairs) ##  207299
-# S7498.S2494
+
+## site coords
+
+fish_ab <- read.csv("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv")
+head(fish_ab)
 
 ## get coords
 SiteCoords <- fish_ab %>%
   dplyr::select(SiteID, Latitude, Longitude) %>%
   distinct()
 
-## loop over pairs
+## loop over pairs - takes a long ass time, go do something else for a bit...
 
 for(p in 1:length(pairs)) {
 
@@ -127,28 +126,29 @@ for(p in 1:length(pairs)) {
 
 }
 
-head(syncsites)
-names(syncsites)
+save(syncsites, file = "output_data/sync/03_all_pair_distances.RData")
 
-## combine with remaining sync data
+
+
+# Combine with single trait DF --------------------------------------------
+
+sync <- read.csv("output_data/sync/02_funcgroup_traitgroup_between_all_sites_single_traits_biogeographic_regions_interpolated.csv")
 head(sync)
-head(syncsites)
 
-tail(sync$Pair)
-tail(syncsites$Pair)
+load(file = "output_data/sync/03_all_pair_distances.RData") ## syncsites
 
+## make Pair column
 sync <- sync %>%
   unite(Pair, Site_ID1:Site_ID2,sep = ".", remove=F)
 
+## take only distance columns
 sync_sub <- syncsites %>%
   dplyr::select(Pair:MeanLon)
 
+## join
 all_sync <- left_join(sync, sync_sub, by = "Pair")
 head(all_sync)
 ## convert to similarities
-
-
-head(sync)
 
 syncDF <- all_sync %>%
   group_by(TraitGroup, Region, Trait) %>%
@@ -158,31 +158,114 @@ syncDF <- all_sync %>%
 head(syncDF)
 
 
-write.csv(syncDF, "output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+write.csv(syncDF, "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
 
 
-# Join to interpolated DF -------------------------------------------------
+# Join to ordination DF -------------------------------------------------
 
-syncDF <- read.csv("output_data/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+## upload 
+ordDF <- read.csv( "output_data/sync/02_funcgroup_traitgroup_between_all_sites_ordination_biogeographic_regions_interpolated.csv")
+head(ordDF)
 
-interDF <- read.csv( "output_data/02_funcgroup_traitgroup_between_all_sites_single_traits_biogeographic_regions_interpolated.csv")
+## take only distance columns
+sync_sub <- syncsites %>%
+  dplyr::select(Connectivity:MeanLon)
 
-head(syncDF)
-head(interDF)
-tail(interDF$X)
-unique(interDF$Trait)
-unique(syncDF$Trait)
-
-syncDF <- syncDF %>%
-  dplyr::select(Region:TraitGroup, Pair, Connectivity:MaxDist)
-
-interDF <- interDF %>%
+## remove X and make Pair column
+ordDF <- ordDF %>%
  dplyr::select(-X) %>%
   mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
   
-# ?left_join
-interDF_join <- left_join(interDF, syncDF, by=c("Region", "Trait", "TraitGroup", "Pair"))
-head(interDF_join)
-sum(is.na(interDF_join))
+## join
+all_sync <- left_join(ordDF, sync_sub, by = "Pair")
+head(all_sync)
+## convert to similarities
 
-write.csv(interDF_join, "output_data/03_temp_sync_between_sites_bioregions_interpolated.csv") ## this is wrong!!! Nov 29th 2021
+syncDF <- all_sync %>%
+  group_by(TraitGroup, Region, Axis) %>%
+  mutate(MaxDist = max(Euclid_Dist_Meters)) %>%
+  mutate(Similarity = 1-(Euclid_Dist_Meters/MaxDist))
+
+head(syncDF)
+
+write.csv(syncDF, "output_data/sync/03_sync_data_ordination_traitgroup_similarity_euclidean_dist_interpolated.csv") 
+
+
+# Combine with single traits LOO ------------------------------------------
+
+load(file= "output_data/sync/02_Oceania_single_traits_interpolated_site_sync_one_out.RData")
+oc_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_USA_single_traits_interpolated_site_sync_one_out.RData")
+usa_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_Europe_single_traits_interpolated_site_sync_one_out.RData")
+eu_sync <- synchrony_axis
+
+interDF <- rbind(oc_sync, usa_sync, eu_sync)
+
+## take only distance columns
+sync_sub <- syncsites %>%
+  dplyr::select(Connectivity:MeanLon)
+
+## remove X and make Pair column
+interDF <- interDF %>%
+  # dplyr::select(-X) %>%
+  mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
+
+## join
+all_sync <- left_join(interDF, sync_sub, by = "Pair")
+head(all_sync)
+tail(all_sync)
+
+## convert to similarities
+
+syncDF <- all_sync %>%
+  group_by(TraitGroup, Region, Trait) %>%
+  mutate(MaxDist = max(Euclid_Dist_Meters)) %>%
+  mutate(Similarity = 1-(Euclid_Dist_Meters/MaxDist))
+
+head(syncDF)
+
+
+write.csv(syncDF, "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.csv")
+
+
+# Combine with ordination LOO ---------------------------------------------
+
+load(file= "output_data/sync/02_Oceania_ordination_interpolated_site_sync_one_out.RData")
+oc_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_USA_ordination_interpolated_site_sync_one_out.RData")
+usa_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_Europe_ordination_interpolated_site_sync_one_out.RData")
+eu_sync <- synchrony_axis
+
+interDF <- rbind(oc_sync, usa_sync, eu_sync)
+
+## take only distance columns
+sync_sub <- syncsites %>%
+  dplyr::select(Connectivity:MeanLon)
+
+## remove X and make Pair column
+interDF <- interDF %>%
+  # dplyr::select(-X) %>%
+  mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
+
+## join
+all_sync <- left_join(interDF, sync_sub, by = "Pair")
+head(all_sync)
+tail(all_sync)
+
+## convert to similarities
+
+syncDF <- all_sync %>%
+  group_by(TraitGroup, Region, Axis) %>%
+  mutate(MaxDist = max(Euclid_Dist_Meters)) %>%
+  mutate(Similarity = 1-(Euclid_Dist_Meters/MaxDist))
+
+head(syncDF)
+
+write.csv(syncDF, "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.csv")
+

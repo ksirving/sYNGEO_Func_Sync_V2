@@ -157,7 +157,7 @@ for(t in 1:length(tg)) {
   head(tgData)
   
   
-  ### loop over basins
+  ### loop over regions
   for (region in 1:length(regionsID)) {
     
     basindata<-tgData[tgData$BiogeoRegion==regionsID[region],]
@@ -204,7 +204,7 @@ for(t in 1:length(tg)) {
       # correl_result
       names(basindata)
       head(basindata)
-      synchrony_axis<-rbind(synchrony_axis, cbind(basindata$BiogeoRegion[1], basindata$Country[1], 
+      synchrony_axis<-rbind(synchrony_axis, cbind(basindata$BiogeoRegion[1], 
                                                   drop.levels(Ntraits[ax]),
                                                   basindata$TraitGroup[1],
                                                   correl_result,site_ID1,site_ID2))
@@ -222,8 +222,7 @@ for(t in 1:length(tg)) {
 head(synchrony_axis)
 warnings()
 synchrony_axis<-data.frame(synchrony_axis)
-colnames(synchrony_axis)<-c("Region", "Country", "Axis","TraitGroup", "Correlation","Site_ID1","Site_ID2")
-nlevels(factor(synchrony_axis$basin_ID)) # 43
+colnames(synchrony_axis)<-c("Region", "Axis","TraitGroup", "Correlation","Site_ID1","Site_ID2")
 nlevels(factor(synchrony_axis$Axis)) # 7
 unique(synchrony_axis$Axis)
 sum(is.na(synchrony_axis))

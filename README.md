@@ -6,6 +6,7 @@
 2 - 01b_single_traits_interpolated_abundances.R
 3 - 02a_sync_trait_ord_groups_eff_resp_interpolated.R
 4 - 02b_sync_single_traits_groups_eff_resp_interpolated.R
+5 - 03a_dummy_connectivity_variable_interpolated.R
 
 
 # 01a_trait_ordination_interpolated_abundances.R
@@ -20,7 +21,7 @@ same as above but with single traits
 Produces CWMs (interpolated) for all traits and groups
 
 
-### output_data from scripts 02a & 02b are saved into output_data/sync under .gitignore
+### output_data from scripts 02a & 02b & 3a & 3b are saved into output_data/sync under .gitignore
 # 02a_sync_trait_ord_groups_eff_resp_interpolated.R
 
 calculates synchrony with ordination scores
@@ -32,3 +33,8 @@ within site, between site, jackknife (leaving one year out)
 calculates synchrony for single traits
 within site, between site, jackknife (leaving one year out)
 also includes synchrony calculation for temperature and flow
+
+## 03a_dummy_connectivity_variable_interpolated.R
+
+calculates distances and connectivity variable
+joins to all synchrony datasets
