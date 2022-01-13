@@ -80,7 +80,6 @@ save(ssLOO_join, file = "output_data/sync/04_sync_single_traits_LOO.RData")
 
 # Ordination -----------------------------------------------------------
 
-
 ## upload
 load("output_data/sync/03_sync_data_ordination_traitgroup_similarity_euclidean_dist_interpolated.RData")
 ssAll <- syncDF
