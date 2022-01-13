@@ -9,9 +9,9 @@ library(tidyverse)
 
 
 ## upload
-load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.RData")
 ssAll <- syncDF
-load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.csv")
+load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.RData")
 ssLOO <- syncDF
 rm(syncDF)
 
@@ -32,7 +32,7 @@ ssLOO <- ssLOO %>%
 
 head(ssAll)
 head(ssLOO)
-unique(ssCor$YearRemoved)
+
 
 ## join together
 
@@ -58,15 +58,15 @@ head(ssCor_Diff)
 
 range(na.omit(ssCor_Diff$SyncDiff))
 
-range(na.omit(ssCor_Diff$SyncDiffPerc))
+range(na.omit(ssCor_Diff$SyncDiffPerc)) ## silly numbers, stick with absolute difference
 
 ### add distances etc back to LOO df
 
-load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.csv")
+load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.RData")
 ssLOO <- syncDF
 
 ssLOO <- ssLOO %>% 
-  # rename(CorrelationLOO = Correlation) %>%
+  rename(CorrelationLOO = Correlation) %>%
   mutate(CorrelationLOO = as.numeric(as.character(CorrelationLOO)))
 head(ssLOO)
 
@@ -76,15 +76,15 @@ head(ssLOO_join)
 ssLOO_join <- ssLOO_join %>% 
   rename(CorrelationALL = Correlation)
 
-save(ssLOO_join, file = "output_data/sync/04_sync_single_traits_LOO.csv")
+save(ssLOO_join, file = "output_data/sync/04_sync_single_traits_LOO.RData")
 
 # Ordination -----------------------------------------------------------
 
 
 ## upload
-load("output_data/sync/03_sync_data_ordination_traitgroup_similarity_euclidean_dist_interpolated.csv")
+load("output_data/sync/03_sync_data_ordination_traitgroup_similarity_euclidean_dist_interpolated.RData")
 ssAll <- syncDF
-load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.csv")
+load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.RData")
 ssLOO <- syncDF
 rm(syncDF)
 
@@ -135,7 +135,7 @@ range(na.omit(ssCor_Diff$SyncDiffPerc))
 
 ## add differences back to LOO df
 
-load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.csv")
+load("output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.RData")
 ssLOO <- syncDF
 
 ssLOO <- ssLOO %>% 
@@ -149,4 +149,4 @@ head(ssLOO_join)
 ssLOO_join <- ssLOO_join %>% 
   rename(CorrelationALL = Correlation)
 
-save(ssLOO_join, file = "output_data/sync/04_sync_ordination_LOO.csv")
+save(ssLOO_join, file = "output_data/sync/04_sync_ordination_LOO.RData")

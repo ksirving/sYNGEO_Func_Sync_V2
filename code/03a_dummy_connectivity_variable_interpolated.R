@@ -143,7 +143,7 @@ sync <- sync %>%
 
 ## take only distance columns
 sync_sub <- syncsites %>%
-  dplyr::select(Pair:MeanLon)
+  dplyr::select(Connectivity:MeanLon)
 
 ## join
 all_sync <- left_join(sync, sync_sub, by = "Pair")
@@ -158,7 +158,7 @@ syncDF <- all_sync %>%
 head(syncDF)
 
 
-save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.csv")
+save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.RData")
 
 
 # Join to ordination DF -------------------------------------------------
@@ -188,7 +188,7 @@ syncDF <- all_sync %>%
 
 head(syncDF)
 
-save(syncDF, file = "output_data/sync/03_sync_data_ordination_traitgroup_similarity_euclidean_dist_interpolated.csv") 
+save(syncDF, file = "output_data/sync/03_sync_data_ordination_traitgroup_similarity_euclidean_dist_interpolated.RData") 
 
 
 # Combine with single traits LOO ------------------------------------------
@@ -228,7 +228,7 @@ syncDF <- all_sync %>%
 head(syncDF)
 
 
-save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.csv")
+save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_LOO.RData")
 
 
 # Combine with ordination LOO ---------------------------------------------
@@ -267,5 +267,5 @@ syncDF <- all_sync %>%
 
 head(syncDF)
 
-save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.csv")
+save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.RData")
 

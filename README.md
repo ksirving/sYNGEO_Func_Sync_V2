@@ -42,4 +42,4 @@ joins to all synchrony datasets
 
 ## 04_differences_in_synchrony.R
 
-calculates the differences in synchrony from the calculation of using all years and the jack knife leave one out (LOO)
+calculates the differences in synchrony from the calculation of sync using all years and the jack knife leave one out (LOO)
