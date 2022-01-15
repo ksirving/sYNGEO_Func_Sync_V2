@@ -344,7 +344,7 @@ smbx <- ggplot(subset(SyncBasin, Connectivity == 1), aes(x=YearRemoved, y=SyncDi
   geom_boxplot() +
   facet_wrap(~TraitGroup) +
   theme(axis.text.x = element_text(angle = 60, hjust=1)) +
-  scale_y_continuous(name="Synchrony") 
+  scale_y_continuous(name="Change in Synchrony") 
 # scale_x_log10(name="Year Removed")
 
 smbx
@@ -359,11 +359,107 @@ smbx2 <- ggplot(subset(SyncBasin, Connectivity == 0), aes(x=YearRemoved, y=SyncD
   geom_boxplot() +
   facet_wrap(~TraitGroup) +
   theme(axis.text.x = element_text(angle = 60, hjust=1)) +
-  scale_y_continuous(name="Synchrony") 
+  scale_y_continuous(name="Change in Synchrony") 
 # scale_x_log10(name="Year Removed")
 
 smbx2
 
 file.name1 <- paste0(out.dir, "Between_basin_ordination_traitgrp_LOO_boxplots.jpg")
+ggsave(smbx2, filename=file.name1, dpi=300, height=5, width=6)
+
+
+# temp and flow LOO -------------------------------------------------------
+
+### temp
+## data 
+
+load(file = "output_data/sync/04_sync_temp_LOO.RData") # ssLOO_join
+
+head(ssLOO_join)
+names(ssLOO_join)
+dim(ssLOO_join)
+
+##  convert year to factor
+SyncBasin <- ssLOO_join %>%
+  # select(-X) %>%
+  mutate(Euclid_Dist_KM = Euclid_Dist_Meters/1000, YearRemoved = as.factor(YearRemoved)) 
+
+# SyncBasin <- SimSync
+
+head(SyncBasin)
+
+## within basin boxplot
+
+smbx <- ggplot(subset(SyncBasin, Connectivity == 1), aes(x=YearRemoved, y=SyncDiff)) +
+  geom_boxplot() +
+  facet_wrap(~env_var) +
+  theme(axis.text.x = element_text(angle = 60, hjust=1)) +
+  scale_y_continuous(name="Change in Synchrony") 
+# scale_x_log10(name="Year Removed")
+
+smbx
+
+file.name1 <- paste0(out.dir, "Within_basin_temp_LOO_boxplots.jpg")
+ggsave(smbx, filename=file.name1, dpi=300, height=5, width=6)
+
+
+## between basin
+
+smbx2 <- ggplot(subset(SyncBasin, Connectivity == 0), aes(x=YearRemoved, y=SyncDiff)) +
+  geom_boxplot() +
+  facet_wrap(~env_var) +
+  theme(axis.text.x = element_text(angle = 60, hjust=1)) +
+  scale_y_continuous(name="Change in Synchrony") 
+# scale_x_log10(name="Year Removed")
+
+smbx2
+
+file.name1 <- paste0(out.dir, "Between_basin_temp_LOO_boxplots.jpg")
+ggsave(smbx2, filename=file.name1, dpi=300, height=5, width=6)
+
+## flow
+
+load(file = "output_data/sync/04_sync_flow_LOO.RData") # ssLOO_join
+
+head(ssLOO_join)
+names(ssLOO_join)
+dim(ssLOO_join)
+
+##  convert year to factor
+SyncBasin <- ssLOO_join %>%
+  # select(-X) %>%
+  mutate(Euclid_Dist_KM = Euclid_Dist_Meters/1000, YearRemoved = as.factor(YearRemoved)) 
+
+# SyncBasin <- SimSync
+
+head(SyncBasin)
+
+## within basin boxplot
+
+smbx <- ggplot(subset(SyncBasin, Connectivity == 1), aes(x=YearRemoved, y=SyncDiff)) +
+  geom_boxplot() +
+  facet_wrap(~env_var) +
+  theme(axis.text.x = element_text(angle = 60, hjust=1)) +
+  scale_y_continuous(name="Change in Synchrony") 
+# scale_x_log10(name="Year Removed")
+
+smbx
+
+file.name1 <- paste0(out.dir, "Within_basin_flow_LOO_boxplots.jpg")
+ggsave(smbx, filename=file.name1, dpi=300, height=5, width=6)
+
+
+## between basin
+
+smbx2 <- ggplot(subset(SyncBasin, Connectivity == 0), aes(x=YearRemoved, y=SyncDiff)) +
+  geom_boxplot() +
+  facet_wrap(~env_var) +
+  theme(axis.text.x = element_text(angle = 60, hjust=1)) +
+  scale_y_continuous(name="Change in Synchrony") 
+# scale_x_log10(name="Year Removed")
+
+smbx2
+
+file.name1 <- paste0(out.dir, "Between_basin_flow_LOO_boxplots.jpg")
 ggsave(smbx2, filename=file.name1, dpi=300, height=5, width=6)
 

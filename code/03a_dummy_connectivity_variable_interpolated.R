@@ -269,3 +269,86 @@ head(syncDF)
 
 save(syncDF, file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated_ordination_LOO.RData")
 
+
+# Combine with temp and flow LOO ------------------------------------------
+
+### temperature
+
+## upload and combine LOO dfs
+load(file= "output_data/sync/02_Oceania_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+oc_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_USA_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+usa_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_Europe_temperature_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+eu_sync <- synchrony_axis
+
+interDF <- rbind(oc_sync, usa_sync, eu_sync)
+
+
+## take only distance columns
+sync_sub <- syncsites %>%
+  dplyr::select(Connectivity:MeanLon)
+
+## remove X and make Pair column
+interDF <- interDF %>%
+  # dplyr::select(-X) %>%
+  mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
+
+## join
+all_sync <- left_join(interDF, sync_sub, by = "Pair")
+head(all_sync)
+tail(all_sync)
+
+## convert to similarities
+
+syncDF <- all_sync %>%
+  group_by(env_var, Region) %>%
+  mutate(MaxDist = max(Euclid_Dist_Meters)) %>%
+  mutate(Similarity = 1-(Euclid_Dist_Meters/MaxDist))
+
+head(syncDF)
+
+save(syncDF, file = "output_data/sync/03_sync_data_temperature_LOO.RData")
+
+## Flow
+
+# upload and combine LOO dfs
+load(file= "output_data/sync/02_Oceania_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+oc_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_USA_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+usa_sync <- synchrony_axis
+
+load(file= "output_data/sync/02_Europe_flow_between_all_sites_biogeographic_regions_interpolated_sync_one_out.RData")
+eu_sync <- synchrony_axis
+
+interDF <- rbind(oc_sync, usa_sync, eu_sync)
+
+
+## take only distance columns
+sync_sub <- syncsites %>%
+  dplyr::select(Connectivity:MeanLon)
+
+## remove X and make Pair column
+interDF <- interDF %>%
+  # dplyr::select(-X) %>%
+  mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
+
+## join
+all_sync <- left_join(interDF, sync_sub, by = "Pair")
+head(all_sync)
+tail(all_sync)
+
+## convert to similarities
+
+syncDF <- all_sync %>%
+  group_by(env_var, Region) %>%
+  mutate(MaxDist = max(Euclid_Dist_Meters)) %>%
+  mutate(Similarity = 1-(Euclid_Dist_Meters/MaxDist))
+
+head(syncDF)
+
+save(syncDF, file = "output_data/sync/03_sync_data_flow_LOO.RData")
+

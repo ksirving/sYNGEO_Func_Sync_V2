@@ -8,6 +8,8 @@
 4 - 02b_sync_single_traits_groups_eff_resp_interpolated.R
 5 - 03a_dummy_connectivity_variable_interpolated.R
 6 - 04_differences_in_synchrony.R
+7 - 05a_figures_single_traits.R
+8 - 05b_figures_ordination.R
 
 
 # 01a_trait_ordination_interpolated_abundances.R
@@ -43,3 +45,12 @@ joins to all synchrony datasets
 ## 04_differences_in_synchrony.R
 
 calculates the differences in synchrony from the calculation of sync using all years and the jack knife leave one out (LOO)
+some NAs in df, from where correaltion couldn't be calculated in scrip 02a/b
+
+## 05a_figures_single_traits.R
+## 05b_figures_ordination.R
+
+
+
+
+

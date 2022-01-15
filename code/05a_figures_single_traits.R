@@ -345,7 +345,7 @@ smbx <- ggplot(subset(SyncBasin, Connectivity == 1), aes(x=YearRemoved, y=SyncDi
   geom_boxplot() +
   facet_wrap(~TraitGroup) +
   theme(axis.text.x = element_text(angle = 60, hjust=1)) +
-  scale_y_continuous(name="Synchrony") 
+  scale_y_continuous(name="Change in Synchrony") 
 # scale_x_log10(name="Year Removed")
 
 smbx
@@ -361,7 +361,7 @@ smbx2 <- ggplot(subset(SyncBasin, Connectivity == 0), aes(x=YearRemoved, y=SyncD
   geom_boxplot() +
   facet_wrap(~TraitGroup) +
   theme(axis.text.x = element_text(angle = 60, hjust=1)) +
-  scale_y_continuous(name="Synchrony") 
+  scale_y_continuous(name="Change in Synchrony") 
 # scale_x_log10(name="Year Removed")
 
 smbx2
