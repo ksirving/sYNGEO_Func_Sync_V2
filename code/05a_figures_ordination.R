@@ -174,7 +174,7 @@ t1 <- ggplot(subset(SyncBasinTF, Connectivity == 1), aes(x=TempCor, y=Correlatio
 t1
 
 
-file.name1 <- paste0(out.dir, "Within_basin_sync_v_temp_sync.jpg")
+file.name1 <- paste0(out.dir, "Within_basin_sync_v_temp_sync_ordination.jpg")
 ggsave(t1, filename=file.name1, dpi=300, height=5, width=6)
 
 ## between basin synchrony
@@ -187,7 +187,7 @@ t2 <- ggplot(subset(SyncBasinTF, Connectivity == 0), aes(x=TempCor, y=Correlatio
 t2
 
 
-file.name2 <- paste0(out.dir, "Between_basin_sync_v_temp_sync.jpg")
+file.name2 <- paste0(out.dir, "Between_basin_sync_v_temp_sync_ordination.jpg")
 ggsave(t2, filename=file.name2, dpi=300, height=5, width=6)
 
 ## within basin synchrony v  flow
@@ -200,7 +200,7 @@ f1 <- ggplot(subset(SyncBasinTF, Connectivity == 1), aes(x=FlowCor, y=Correlatio
 f1
 
 
-file.name1 <- paste0(out.dir, "Within_basin_sync_v_flow_sync.jpg")
+file.name1 <- paste0(out.dir, "Within_basin_sync_v_flow_sync_ordination.jpg")
 ggsave(f1, filename=file.name1, dpi=300, height=5, width=6)
 
 ## between basin synchrony
@@ -213,7 +213,7 @@ f2 <- ggplot(subset(SyncBasinTF, Connectivity == 0), aes(x=FlowCor, y=Correlatio
 f2
 
 
-file.name2 <- paste0(out.dir, "Between_basin_sync_v_flow_sync.jpg")
+file.name2 <- paste0(out.dir, "Between_basin_sync_v_flow_sync_ordination.jpg")
 ggsave(f2, filename=file.name2, dpi=300, height=5, width=6)
 
 head(SyncBasinTF)

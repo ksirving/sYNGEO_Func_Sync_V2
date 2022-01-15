@@ -48,9 +48,13 @@ calculates the differences in synchrony from the calculation of sync using all y
 some NAs in df, from where correaltion couldn't be calculated in scrip 02a/b
 
 ## 05a_figures_single_traits.R
+
+create figures for single trait synchrony and env variables. for overall synchrony and contribution of years (leave one out, LOO)
+
 ## 05b_figures_ordination.R
 
-
+create figures for ordination synchrony and env variables. for overall synchrony and contribution of years (leave one out, LOO)
+also includes temp and flow LOO figures
 
 
 
