@@ -325,6 +325,8 @@ for (region in 1:length(regionsID)) {
 load(file="input_data/Env/clim_data_melt_raw_new_sites.RData")
 head(melt_clim_raw)
 
+# S10203.S10089 e.g. missing pair, both sites missing 
+
 sites <- all_groups %>%
   select(SiteID, HydroBasin, Country) %>%
   # rename(SiteID = site) %>%
@@ -341,6 +343,10 @@ clim_sites <- full_join(melt_clim_raw, sites, by="SiteID")
 
 clim_sites <- clim_sites %>%
   filter(!year == 2003)
+
+test <- clim_sites %>%
+  filter(SiteID == "S10203")
+
 clim_sites <- na.omit(clim_sites)
 dim(clim_sites)
 length(unique(clim_sites$SiteID))
@@ -351,8 +357,8 @@ head(clim_sites)
 regionsID<-unique(clim_sites$BiogeoRegion) # 3 regions
 regionsID
 synchrony_axis = NULL
-region = 1
-
+region = 3
+ax=1
 
 ### loop over regions
 for (region in 1:length(regionsID)) {
@@ -376,7 +382,7 @@ for (region in 1:length(regionsID)) {
       spread(SiteID, Temp) #%>% ## some NAs appear here, don't have all trait scores for all site years
     head(trait_data)
     # flip data
-    trait_data <- t(trait_data)[-c(1:5),]
+    trait_data <- t(trait_data)[-c(1:3),]
     
     # define rows and column names and convert to numbers
     sitesIDs<-rownames(trait_data)
@@ -387,7 +393,7 @@ for (region in 1:length(regionsID)) {
     
     ### synchrony
     correlation<-cor(t(trait_data), use = "pairwise.complete.obs")
-    # head(correlation)
+    head(correlation)
     # write.csv(correlation, paste("output_data/cor_matrix/02_site_sync_", regionsID[region], 
     #                              "_", Ntraits[ax], ".csv", sep=""))
     
@@ -480,7 +486,7 @@ for (region in 1:length(regionsID)) {
       spread(SiteID, Flow) #%>% ## some NAs appear here, don't have all trait scores for all site years
     head(trait_data)
     # flip data
-    trait_data <- t(trait_data)[-c(1:5),]
+    trait_data <- t(trait_data)[-c(1:3),]
     
     # define rows and column names and convert to numbers
     sitesIDs<-rownames(trait_data)
