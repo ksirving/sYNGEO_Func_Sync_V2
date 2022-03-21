@@ -13,11 +13,11 @@ library(ggplot2)
 library(Amelia)
 library("StatMatch")
 
-setwd("/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/sYNGEO_Func_Sync")
+setwd("/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/sYNGEO_Func_Sync_V2")
 getwd()
 
 ## directory for figures
-out.dir <- "/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/sYNGEO_Func_Sync/Figures/"
+out.dir <- "/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/sYNGEO_Func_Sync_V2/Figures/"
 
 # Traits ------------------------------------------------------------------
   
@@ -38,6 +38,19 @@ rare_species <- trt %>%
 
 RSp <- rare_species$Species
 RSp
+
+head(trt)
+
+str(cor_trt)
+
+cor_trt <- trt %>%
+  select(-Species, - number_nas, -AVG_RGUILD, -AVG_Troph)
+
+cor_mat <- cor(cor_trt, use = "complete.obs")
+
+?cor
+
+write.csv(cor_mat, "output_data/01b_trait_correlation.csv")
 
 
 # log traits

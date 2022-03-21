@@ -8,6 +8,9 @@ library(tidyverse)
 
 getwd()
 
+## directory for figures
+out.dir <- "/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/sYNGEO_Func_Sync_V2/Figures/"
+
 ## upload fish abundance and site data
 originaldata <- read.csv("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv")
 head(originaldata)
@@ -351,4 +354,102 @@ syncDF <- all_sync %>%
 head(syncDF)
 
 save(syncDF, file = "output_data/sync/03_sync_data_flow_LOO.RData")
+
+
+
+# watercourse V euclid distance -------------------------------------------
+library(scales)
+## euclid distance
+load(file = "output_data/sync/03_all_pair_distances.RData") ## syncsites
+head(syncsites)
+
+## format euclid - remove sites not in same basin
+syncsites <- syncsites %>%
+  mutate(DistMetersEuclid = Euclid_Dist_Meters) %>%
+  filter(Connectivity == 1) %>%
+  select(Pair, DistMetersEuclid)
+
+## water course distance
+watersites <- read.csv2("input_data/sites/Sites_DistancesRiverATLAS_280621.csv")
+head(watersites)
+
+## format water course data
+
+watersites <- watersites %>%
+  mutate(Pair = paste(SiteID_Orig, SiteID_Dest, sep =".")) %>%
+  mutate(DistMetersWater = as.numeric(TotLong_Meters)) %>%
+  select(Pair, DistMetersWater)
+
+head(watersites)
+head(syncsites)
+
+length(syncsites$Pair) # 8459
+length(watersites$Pair) # 17221
+sum(watersites$Pair %in% syncsites$Pair) ## ~200 site pairs missing - could be related to filtering of species/traits/sites
+
+all_sites <- left_join(syncsites, watersites, by = "Pair")
+head(all_sites)
+
+str(all_sites)
+
+cor(all_sites$DistMetersEuclid, all_sites$DistMetersWater, use = "complete.obs") ## 0.93
+
+## make data long for plot
+
+# all_sites_long <- all_sites %>%
+#   pivot_longer(DistMetersEuclid:DistMetersWater, names_to = "Type", values_to = "Meters")
+# 
+# head(all_sites_long)
+
+t1 <- ggplot(all_sites, aes(x=DistMetersWater/1000, y = DistMetersEuclid/1000)) +
+  geom_point() +
+  scale_y_log10(name="Log Eucliean Distance (km)", labels = comma) +
+  scale_x_log10(name="Log Water Course Distance (km)", labels = comma) 
+
+file.name1 <- paste0(out.dir, "watercourse_v_euclid.jpg")
+ggsave(t1, filename=file.name1, dpi=300, height=5, width=6)
+t1
+
+# ggplot(all_sites, aes(x=DistMetersWater/1000, y = DistMetersEuclid/1000)) +
+#   geom_point() +
+#   scale_y_continuous(name="Eucliean Distance (km)", labels = comma, limits = c(0, 3000)) +
+#   scale_x_continuous(name="Water Course Distance (km)", labels = comma, limits = c(0, 3000)) 
+
+
+
+# Add water course distance to synchrony ----------------------------------
+
+head(watersites)
+
+## convert to km
+
+watersites <- watersites %>%
+  mutate(WCDistkm = DistMetersWater/1000)
+  
+## upload 
+load(file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.RData")
+
+head(syncDF)
+
+unique(syncDF$Trait)
+syncDF <- left_join(syncDF, watersites, by = "Pair") 
+
+syncDF <- syncDF %>%
+  filter(Connectivity == 1, Trait %in% c("AVG_MXL", "AVG_FECUND", "Tp_pref")) %>%
+  mutate(Euclid_Dist_KM = Euclid_Dist_Meters/1000 ) %>%
+  pivot_longer(c(Euclid_Dist_KM, WCDistkm), names_to = "Dist_Type", values_to = "KM")
+
+
+sm1a <- ggplot(syncDF, aes(x=KM, y=Correlation, color = Dist_Type)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~Trait) +
+  scale_color_discrete(name = "Distance Type", labels = c("Euclidean", "Water Course")) +
+  scale_y_continuous(name="Synchrony") +
+  scale_x_log10(name="Log Distance (km)", labels = comma) 
+sm1a
+
+
+file.name1 <- paste0(out.dir, "Euclid_v_waterCourse_distance_3_traits.jpg")
+ggsave(sm1a, filename=file.name1, dpi=300, height=5, width=6)
+
 
