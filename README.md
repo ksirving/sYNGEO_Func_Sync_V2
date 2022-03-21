@@ -41,6 +41,7 @@ also includes synchrony calculation for temperature and flow
 
 calculates distances and connectivity variable
 joins to all synchrony datasets
+join on water course distance for testing
 
 ## 04_differences_in_synchrony.R
 
