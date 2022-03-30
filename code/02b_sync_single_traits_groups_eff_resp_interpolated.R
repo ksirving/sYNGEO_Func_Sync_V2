@@ -11,10 +11,11 @@ library(codyn)
 library(munfold)
 library(data.table)
 library(gdata)
+library(here)
 
 getwd()
 ## upload fish abundance and site data
-originaldata <- read.csv("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv")
+originaldata <- read.csv(here("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv"))
 head(originaldata)
 
 # test <- originaldata %>% filter(SiteID == "S6654")
@@ -22,7 +23,7 @@ head(originaldata)
 
 ## upload and format community weighted mean traits - all groups
 
-trait_matrix <- read.csv("output_data/01_trt_single_traits_interpolated.csv")
+trait_matrix <- read.csv(here("output_data/01_trt_single_traits_interpolated.csv"))
 
 ## combine all groups
 

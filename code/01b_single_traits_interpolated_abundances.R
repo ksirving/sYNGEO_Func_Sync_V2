@@ -178,6 +178,7 @@ remove_sites ## sites to be removed
 ## remove from main DF
 fish_ab  <- fish_ab %>%
   filter(!SiteID %in% remove_sites)
+write_csv(fish_ab, here("input_data", "Bio", "fish_ab.csv"))
 
 ## look at abundance per site over all years
 ## define years 
@@ -315,7 +316,7 @@ envPref <- trt %>%
 
 
 ### format fish abundances
-fish_ab2 <- fish_ab_rel_int 
+fish_ab2 <- fish_ab_rel_int
 
 fish_ab2$site_seas_year<-paste(fish_ab2$SiteID, fish_ab2$Month,fish_ab2$Year, sep="_")
 
@@ -336,6 +337,7 @@ which((duplicated(fish_mat3$site_year)==TRUE)) ### no sites sampled twice in a y
 #assign row names to the final fish abund matrix
 row.names(fish_mat3)<-fish_mat3$site_year
 sum(is.na(fish_mat3)) ## 1262
+write_csv(fish_mat3, here("input_data", "Bio", "fish_mat3.csv"))
 
 
 ### merge with traits - food

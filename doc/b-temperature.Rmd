@@ -1,8 +1,11 @@
 ---
-title: "Untitled Draft"
-author: "Report Author"
+title: "Temperature data"
+author: "Alain Danet"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -53,7 +56,8 @@ summarise(mv_avg = mean(mv_avg, na.rm = TRUE), .groups = "drop")
 ```{r}
 awt_lg %>%
   ggplot(aes(x = year, y = mv_avg, color = variable)) +
-  geom_smooth()
+  geom_smooth() +
+  labs(x = "Year", y = "Temperature (°C)", title = "Moving average window")
 ```
 
 ```{r}
