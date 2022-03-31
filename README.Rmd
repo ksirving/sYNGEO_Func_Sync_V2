@@ -15,14 +15,14 @@ knitr::opts_chunk$set(
 
 # Code index
 
-1 - 01a_trait_ordination_interpolated_abundances.R
-2 - 01b_single_traits_interpolated_abundances.R
-3 - 02a_sync_trait_ord_groups_eff_resp_interpolated.R
-4 - 02b_sync_single_traits_groups_eff_resp_interpolated.R
-5 - 03a_dummy_connectivity_variable_interpolated.R
-6 - 04_differences_in_synchrony.R
-7 - 05a_figures_single_traits.R
-8 - 05b_figures_ordination.R
+1. 01a_trait_ordination_interpolated_abundances.R
+1. 01b_single_traits_interpolated_abundances.R
+1. 02a_sync_trait_ord_groups_eff_resp_interpolated.R
+1. 02b_sync_single_traits_groups_eff_resp_interpolated.R
+1. 03a_dummy_connectivity_variable_interpolated.R
+1. 04_differences_in_synchrony.R
+1. 05a_figures_single_traits.R
+1. 05b_figures_ordination.R
 
 
 # 01a_trait_ordination_interpolated_abundances.R
@@ -31,13 +31,14 @@ Takes raw abundance data and traits for each species
 cleans and interpolates abundances. 
 produces ordinations for each trait group
 
-#01b_single_traits_interpolated_abundances.R
+# 01b_single_traits_interpolated_abundances.R
 
 same as above but with single traits
 Produces CWMs (interpolated) for all traits and groups
 
 
 ### output_data from scripts 02a & 02b & 3a & 3b are saved into output_data/sync under .gitignore
+
 # 02a_sync_trait_ord_groups_eff_resp_interpolated.R
 
 calculates synchrony with ordination scores
@@ -117,3 +118,17 @@ async_mat <- sync_mat
 async_mat[, 1] <- rev(async_mat[, 1])
 compute_synchrony(cov(async_mat))
 ```
+
+# Temperature data
+
+## Moving average over 12 months
+
+See [doc/b-temperature.html](https://github.com/ksirving/sYNGEO_Func_Sync_V2/blob/main/doc/b-temperature.html)
+
+```{r}
+library(tidyverse)
+sites_water_air_tmean_av <- read_csv(
+  here::here("input_data", "Env", "sites_water_air_tmean_av.csv")
+)
+```
+

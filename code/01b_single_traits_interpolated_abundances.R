@@ -181,7 +181,7 @@ fish_ab  <- fish_ab %>%
 write_csv(fish_ab, here("input_data", "Bio", "fish_ab.csv"))
 
 ## look at abundance per site over all years
-## define years 
+## define years
 years <- c("2004" ,"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013")
 
 ## define sites

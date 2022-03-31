@@ -5,20 +5,21 @@
 
 # Code index
 
-1 - 01a\_trait\_ordination\_interpolated\_abundances.R 2 -
-01b\_single\_traits\_interpolated\_abundances.R 3 -
-02a\_sync\_trait\_ord\_groups\_eff\_resp\_interpolated.R 4 -
-02b\_sync\_single\_traits\_groups\_eff\_resp\_interpolated.R 5 -
-03a\_dummy\_connectivity\_variable\_interpolated.R 6 -
-04\_differences\_in\_synchrony.R 7 - 05a\_figures\_single\_traits.R 8 -
-05b\_figures\_ordination.R
+1.  01a\_trait\_ordination\_interpolated\_abundances.R
+2.  01b\_single\_traits\_interpolated\_abundances.R
+3.  02a\_sync\_trait\_ord\_groups\_eff\_resp\_interpolated.R
+4.  02b\_sync\_single\_traits\_groups\_eff\_resp\_interpolated.R
+5.  03a\_dummy\_connectivity\_variable\_interpolated.R
+6.  04\_differences\_in\_synchrony.R
+7.  05a\_figures\_single\_traits.R
+8.  05b\_figures\_ordination.R
 
 # 01a\_trait\_ordination\_interpolated\_abundances.R
 
 Takes raw abundance data and traits for each species cleans and
 interpolates abundances. produces ordinations for each trait group
 
-\#01b\_single\_traits\_interpolated\_abundances.R
+# 01b\_single\_traits\_interpolated\_abundances.R
 
 same as above but with single traits Produces CWMs (interpolated) for
 all traits and groups
@@ -75,14 +76,14 @@ trait <- rnorm(n = 10, mean = 10, sd = 3)
 
 # Compute the moments of trait distribution
 calc_cw_moments(trait = trait, weight = abun)
-#>        mean    variance    skewness    kurtosis 
-#> 10.06988647 11.71930955  0.08577238  2.04631719
+#>      mean  variance  skewness  kurtosis 
+#> 9.7561220 4.4853780 0.3346265 2.2461459
 
 # 
 calc_cw_mean(trait = trait, weight = abun)
-#> [1] 10.06989
+#> [1] 9.756122
 calc_cw_variance(trait = trait, weight = abun)
-#> [1] 11.71931
+#> [1] 4.485378
 ```
 
 ## Synchrony
@@ -115,4 +116,26 @@ async_mat <- sync_mat
 async_mat[, 1] <- rev(async_mat[, 1])
 compute_synchrony(cov(async_mat))
 #> [1] 0
+```
+
+# Temperature data
+
+## Moving average over 12 months
+
+See
+[doc/b-temperature.html](https://github.com/ksirving/sYNGEO_Func_Sync_V2/blob/main/doc/b-temperature.html)
+
+``` r
+library(tidyverse)
+sites_water_air_tmean_av <- read_csv(
+  here::here("input_data", "Env", "sites_water_air_tmean_av.csv")
+)
+#> Rows: 24508 Columns: 4
+#> ── Column specification ──────────────────────────────────────────────────
+#> Delimiter: ","
+#> chr (1): siteid
+#> dbl (3): year, air, water
+#> 
+#> ℹ Use `spec()` to retrieve the full column specification for this data.
+#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```

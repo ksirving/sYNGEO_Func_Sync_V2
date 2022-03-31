@@ -604,10 +604,19 @@ body {
 
 <h1 id="syngeo_func_sync_v2">sYNGEO_Func_Sync_V2</h1>
 <h1 id="code-index">Code index</h1>
-<p>1 - 01a_trait_ordination_interpolated_abundances.R 2 - 01b_single_traits_interpolated_abundances.R 3 - 02a_sync_trait_ord_groups_eff_resp_interpolated.R 4 - 02b_sync_single_traits_groups_eff_resp_interpolated.R 5 - 03a_dummy_connectivity_variable_interpolated.R 6 - 04_differences_in_synchrony.R 7 - 05a_figures_single_traits.R 8 - 05b_figures_ordination.R</p>
+<ol>
+<li>01a_trait_ordination_interpolated_abundances.R</li>
+<li>01b_single_traits_interpolated_abundances.R</li>
+<li>02a_sync_trait_ord_groups_eff_resp_interpolated.R</li>
+<li>02b_sync_single_traits_groups_eff_resp_interpolated.R</li>
+<li>03a_dummy_connectivity_variable_interpolated.R</li>
+<li>04_differences_in_synchrony.R</li>
+<li>05a_figures_single_traits.R</li>
+<li>05b_figures_ordination.R</li>
+</ol>
 <h1 id="01a_trait_ordination_interpolated_abundancesr">01a_trait_ordination_interpolated_abundances.R</h1>
 <p>Takes raw abundance data and traits for each species cleans and interpolates abundances. produces ordinations for each trait group</p>
-<p>#01b_single_traits_interpolated_abundances.R</p>
+<h1 id="01b_single_traits_interpolated_abundancesr">01b_single_traits_interpolated_abundances.R</h1>
 <p>same as above but with single traits Produces CWMs (interpolated) for all traits and groups</p>
 <h3 id="output_data-from-scripts-02a--02b--3a--3b-are-saved-into-output_datasync-under-gitignore">output_data from scripts 02a &amp; 02b &amp; 3a &amp; 3b are saved into output_data/sync under .gitignore</h3>
 <h1 id="02a_sync_trait_ord_groups_eff_resp_interpolatedr">02a_sync_trait_ord_groups_eff_resp_interpolated.R</h1>
@@ -636,14 +645,14 @@ body {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a><span class="co"># Compute the moments of trait distribution</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a><span class="kw">calc_cw_moments</span>(<span class="dt">trait =</span> trait, <span class="dt">weight =</span> abun)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a><span class="co">#&gt;        mean    variance    skewness    kurtosis </span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a><span class="co">#&gt; 10.06988647 11.71930955  0.08577238  2.04631719</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a><span class="co">#&gt;      mean  variance  skewness  kurtosis </span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a><span class="co">#&gt; 9.7561220 4.4853780 0.3346265 2.2461459</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a><span class="co"># </span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a><span class="kw">calc_cw_mean</span>(<span class="dt">trait =</span> trait, <span class="dt">weight =</span> abun)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a><span class="co">#&gt; [1] 10.06989</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a><span class="co">#&gt; [1] 9.756122</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a><span class="kw">calc_cw_variance</span>(<span class="dt">trait =</span> trait, <span class="dt">weight =</span> abun)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a><span class="co">#&gt; [1] 11.71931</span></span></code></pre></div>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a><span class="co">#&gt; [1] 4.485378</span></span></code></pre></div>
 <h2 id="synchrony">Synchrony</h2>
 <p>Source the function at the beginning of your script:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://raw.githubusercontent.com/alaindanet/fishcom/master/R/synchrony.R&quot;</span>)</span>
@@ -671,6 +680,21 @@ body {
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true"></a>async_mat[, <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw">rev</span>(async_mat[, <span class="dv">1</span>])</span>
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true"></a><span class="kw">compute_synchrony</span>(<span class="kw">cov</span>(async_mat))</span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<h1 id="temperature-data">Temperature data</h1>
+<h2 id="moving-average-over-12-months">Moving average over 12 months</h2>
+<p>See <a href="https://github.com/ksirving/sYNGEO_Func_Sync_V2/blob/main/doc/b-temperature.html">doc/b-temperature.html</a></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>sites_water_air_tmean_av &lt;-<span class="st"> </span><span class="kw">read_csv</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  here<span class="op">::</span><span class="kw">here</span>(<span class="st">&quot;input_data&quot;</span>, <span class="st">&quot;Env&quot;</span>, <span class="st">&quot;sites_water_air_tmean_av.csv&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="co">#&gt; Rows: 24508 Columns: 4</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a><span class="co">#&gt; ── Column specification ──────────────────────────────────────────────────</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="co">#&gt; Delimiter: &quot;,&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a><span class="co">#&gt; chr (1): siteid</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a><span class="co">#&gt; dbl (3): year, air, water</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a><span class="co">#&gt; </span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a><span class="co">#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a><span class="co">#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span></code></pre></div>
 
 </body>
 </html>
