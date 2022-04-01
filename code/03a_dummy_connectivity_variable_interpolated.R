@@ -410,12 +410,18 @@ file.name1 <- paste0(out.dir, "watercourse_v_euclid.jpg")
 ggsave(t1, filename=file.name1, dpi=300, height=5, width=6)
 t1
 
-# ggplot(all_sites, aes(x=DistMetersWater/1000, y = DistMetersEuclid/1000)) +
-#   geom_point() +
-#   scale_y_continuous(name="Eucliean Distance (km)", labels = comma, limits = c(0, 3000)) +
-#   scale_x_continuous(name="Water Course Distance (km)", labels = comma, limits = c(0, 3000)) 
+ggplot(all_sites, aes(x=DistMetersWater/1000, y = DistMetersEuclid/1000)) +
+  geom_point() +
+  scale_y_continuous(name="Eucliean Distance (km)", labels = comma, limits = c(0, 3000)) +
+  scale_x_continuous(name="Water Course Distance (km)", labels = comma, limits = c(0, 3000))
 
+# Checking weird sites ----------------------------------------------------
 
+## problem is some euclid distance is longer than water course - water course should always be longer
+
+## get ratio of watercourse/euclid distance
+
+head(all_sites)
 
 # Add water course distance to synchrony ----------------------------------
 
@@ -451,5 +457,11 @@ sm1a
 
 file.name1 <- paste0(out.dir, "Euclid_v_waterCourse_distance_3_traits.jpg")
 ggsave(sm1a, filename=file.name1, dpi=300, height=5, width=6)
+
+
+
+
+
+
 
 
