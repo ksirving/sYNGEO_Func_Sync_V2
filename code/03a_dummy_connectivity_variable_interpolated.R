@@ -378,7 +378,7 @@ head(watersites)
 watersites <- watersites %>%
   mutate(Pair = paste(SiteID_Orig, SiteID_Dest, sep =".")) %>%
   mutate(DistMetersWater = as.numeric(TotLong_Meters)) %>%
-  select(Pair, DistMetersWater)
+  select(Pair, DistMetersWater, BioRealm, HydroBasin, Country)
 
 head(watersites)
 head(syncsites)
@@ -422,6 +422,75 @@ ggplot(all_sites, aes(x=DistMetersWater/1000, y = DistMetersEuclid/1000)) +
 ## get ratio of watercourse/euclid distance
 
 head(all_sites)
+
+ratios <- all_sites %>%
+  mutate(Ratio = DistMetersEuclid/DistMetersWater)
+
+head(ratios)
+
+ratios_big <- ratios %>%
+  filter(Ratio > 1) %>%
+  separate(Pair, into = c("Site_ID1", "Site_ID2"), remove = F)
+
+dim(ratios_big) ## 242
+
+write.csv(ratios_big, "output_data/03_watercourse_smaller_than_euclid_dist.csv")
+
+head(ratios_big)
+## add coords
+
+head(SiteCoords)
+
+pairs <- ratios_big$Pair
+pairs
+
+
+
+p=1
+  
+  ## get pair from sync data
+  
+  pairx <- ratios_big %>%
+    filter(Pair == pairs[p])
+  pairx
+  ## define sites
+  S1 <- pairx$Site_ID1
+  S2 <- pairx$Site_ID2
+  
+  S1
+  
+  ## get coords for each site
+  CoordsS1 <- SiteCoords %>%
+    filter(SiteID == S1) %>%
+    dplyr::select(Longitude, Latitude, SiteID)
+  
+  CoordsS1
+  
+  CoordsS2 <- SiteCoords %>%
+    filter(SiteID == S2) %>%
+    dplyr::select(Longitude, Latitude, SiteID)
+  
+  CoordsS2
+  
+  sp::coordinates(CoordsS1) <- c("Longitude", "Latitude")
+  sp::coordinates(CoordsS2) <- c("Longitude", "Latitude")
+  
+  #Make a distance matrix
+  dst <- pointDistance(CoordsS1,CoordsS2, lonlat=TRUE)
+  dst
+  # str(dst)
+  # get mean latitude/longitude
+  MeanLat <- (CoordsS1$Latitude+CoordsS2$Latitude)/2
+  MeanLon <- (CoordsS1$Longitude+CoordsS2$Longitude)/2
+  
+  ## add to dataframe
+  syncsites[p,8] <- dst
+  syncsites[p,10] <- MeanLat
+  syncsites[p,11] <- MeanLon
+  head(syncsites)
+  
+
+
 
 # Add water course distance to synchrony ----------------------------------
 
