@@ -15,8 +15,7 @@ knitr::opts_chunk$set(
 
 # Code index
 
-1. 01a_trait_ordination_interpolated_abundances.R
-1. 01b_single_traits_interpolated_abundances.R
+1. 01_single_traits_interpolated_abundances_new_cwm.R
 1. 02a_sync_trait_ord_groups_eff_resp_interpolated.R
 1. 02b_sync_single_traits_groups_eff_resp_interpolated.R
 1. 03a_dummy_connectivity_variable_interpolated.R
@@ -25,16 +24,11 @@ knitr::opts_chunk$set(
 1. 05b_figures_ordination.R
 
 
-# 01a_trait_ordination_interpolated_abundances.R
+# 01_single_traits_interpolated_abundances_new_cwm.R
 
 Takes raw abundance data and traits for each species
 cleans and interpolates abundances. 
-produces ordinations for each trait group
-
-# 01b_single_traits_interpolated_abundances.R
-
-same as above but with single traits
-Produces CWMs (interpolated) for all traits and groups
+Produces CWMs and CMVs (interpolated) for all traits and groups
 
 
 ### output_data from scripts 02a & 02b & 3a & 3b are saved into output_data/sync under .gitignore
