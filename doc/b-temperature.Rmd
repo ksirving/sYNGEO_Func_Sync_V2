@@ -1,8 +1,11 @@
 ---
-title: "Untitled Draft"
-author: "Report Author"
+title: "Temperature data"
+author: "Alain Danet"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -16,48 +19,76 @@ library(here)
 ```{r load-targets, include=FALSE}
 awt <- read_csv(here("input_data", "Env", "awt.csv")) %>%
   filter(year > 1980)
+fish_ab <- read_csv(here("input_data", "Bio", "fish_ab.csv"))
 ```
+
+- Keep only the site that are in the synchrony dataset:
 
 ```{r}
 awt_lg <- awt %>%
+  filter(siteid %in% unique(fish_ab$site_id)) %>%
   pivot_longer(
     -c(siteid, year),
     names_to = "variable",
-    values_to = "mv_avg"
-  ) %>%
-mutate(variable = str_replace_all(variable,
-    c("tmp_a_ana" = "air",
-      "tmp_w_ama" = "water"
+    values_to = "mv_avg") %>%
+  mutate(variable = str_replace_all(variable,
+      c("tmp_a_ana" = "air",
+        "tmp_w_ama" = "water"
+      )
     )
   )
-)
 ```
 
 ```{r}
-awt_lg_site_avg <- awt %>%
-  pivot_longer(
-    -c(siteid, year),
-    names_to = "variable",
-    values_to = "mv_avg"
-  ) %>%
-mutate(variable = str_replace_all(variable,
-    c("tmp_a_ana" = "air",
-      "tmp_w_ama" = "water"
-    )
+awt_lg_site_avg <- awt_lg %>%
+  group_by(year, variable) %>%
+  summarise(
+    n_na =  sum(is.na(mv_avg)),
+    perc_na = n_na / length(mv_avg),
+    mv_avg = ifelse(
+      n_na / length(mv_avg) < .20,
+      mean(mv_avg, na.rm = TRUE), NA
+      ),
+    .groups = "drop"
   )
-) %>%
-group_by(year, variable) %>%
-summarise(mv_avg = mean(mv_avg, na.rm = TRUE), .groups = "drop")
 ```
 
 ```{r}
 awt_lg %>%
   ggplot(aes(x = year, y = mv_avg, color = variable)) +
-  geom_smooth()
+  geom_smooth() +
+  labs(x = "Year", y = "Temperature (°C)", title = "Moving average window")
+```
+There is no water temperature data after 2008...
+It is may be better to work with air temperature since data goes from 2004 to
+2013.
+
+
+```{r}
+awt_lg_site_avg %>%
+  ggplot(aes(x = year, y = perc_na, color = variable)) +
+  geom_line(size = 3) +
+  labs(x = "Year", y = "Percentage of NA")
 ```
 
 ```{r}
+fish_ab %>%
+  group_by(year) %>%
+  summarise(n_op = length(unique(site_id))) %>%
+  ggplot(aes(y = n_op, x = year)) +
+  geom_line(size = 3) +
+  labs(x = "Year", y = "# of sampling events")
 ```
+
+```{r}
+sites_water_air_tmean_av <- awt_lg %>%
+  pivot_wider(names_from = "variable", values_from = "mv_avg")
+write_csv(
+  sites_water_air_tmean_av,
+  here("input_data", "Env", "sites_water_air_tmean_av.csv")
+)
+```
+
 
 
 
