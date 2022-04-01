@@ -1,5 +1,3 @@
-### interpolated abundances on trait ordination
-
 library(FD)
 library(vegan)
 library(ape)
@@ -20,7 +18,7 @@ getwd()
 out.dir <- "/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/sYNGEO_Func_Sync_V2/Figures/"
 
 # Traits ------------------------------------------------------------------
-  
+
 ## upload traits
 trt1 <- read.csv("input_data/Bio/matSpecies_imputedCloseTaxa.csv")
 
@@ -36,22 +34,19 @@ trt <- trt1 %>%
 rare_species <- trt %>%
   filter(number_nas >= 2) ## number of missing traits
 
+## define species with low num of traits to remove from abundance df
 RSp <- rare_species$Species
 RSp
 
+## check correlation
 head(trt)
-
-str(cor_trt)
 
 cor_trt <- trt %>%
   select(-Species, - number_nas, -AVG_RGUILD, -AVG_Troph)
 
 cor_mat <- cor(cor_trt, use = "complete.obs")
 
-?cor
-
 write.csv(cor_mat, "output_data/01b_trait_correlation.csv")
-
 
 # log traits
 trt$AVG_MXL<-(trt$AVG_MXL)/10
@@ -67,6 +62,7 @@ trt$BlBd <- log(trt$BlBd+1)
 trt$CFdCPd <- log(trt$CFdCPd+1)
 trt$Length <- log(trt$Length+1)
 
+## check length from diff sources
 ## match lengths
 trt$AVG_MXL
 trt$Length
@@ -94,8 +90,8 @@ str(trt)
 
 trt$AVG_RGUILD_ORD =  as.ordered(trt$AVG_RGUILD_ORD)
 
-## trait correlation
-str(trt_cor)
+## check correlation of logged traits
+
 trt_cor <- trt %>%
   select(-AVG_Troph, -AVG_RGUILD_ORD, -Species)
 
@@ -103,40 +99,10 @@ head(trt_cor)
 # ?cor
 cor_mat <- cor(trt_cor,  use = "pairwise.complete.obs")
 
-## sepatate into effect/response/both and categories
 
-# EdHd
-# MoBd
-# JlHd
-# EhBd
-# BlBd
-## food aquisition - effect
+write.csv(cor_mat, "output_data/01b_trait_correlation_logged.csv")
 
-# HdBd
-# PFiBd
-# PFlBl
-# Length
-# AVG_MXL
-## swimming ability - both
-
-# AVG_LMAT
-# AVG_AGEMAT
-# AVG_LONGY
-# AVG_FECUND
-# AVG_EGGSIZE
-# AVG_RGUILD
-## reproduction - response
-
-# tp_pref
-# Q_pref
-# env preferences - response
-
-# AVG_Troph
-#  trophic level - grouping
-
-head(trt)
-dim(trt)
-
+## save corrected traits
 write.csv(trt, "output_data/01_traits_corrected.csv")
 
 
@@ -180,7 +146,7 @@ remove_sites ## sites to be removed
 ## remove from main DF
 fish_ab  <- fish_ab %>%
   filter(!SiteID %in% remove_sites)
-write_csv(fish_ab, here("input_data", "Bio", "fish_ab.csv"))
+# write_csv(fish_ab, here("input_data", "Bio", "fish_ab.csv"))
 
 ## look at abundance per site over all years
 ## define years
@@ -188,11 +154,11 @@ years <- c("2004" ,"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012
 
 ## define sites
 sites <- unique(fish_ab$SiteID)
-s=21
-s
+
 ## define df 
 mediansx <- NULL
-names(fish_ab)
+
+## change to median of year before and year after?
 
 for(s in 1:length(sites)) {
   
@@ -242,24 +208,26 @@ for(s in 1:length(sites)) {
   
 }
 
-head(mediansx)
+
+##  make long
 mediansx <- mediansx %>%
   pivot_longer(cols = `2009`:`2008`, names_to = "Year", values_to = "Abundance") %>%
   unite("site_year", c(SiteID, Year), sep="_", remove = F)
 dim(mediansx)
+head(mediansx)
 
 ## add back to main DF
-head(fish_ab)
-dim(fish_ab)
+
 fish_ab_sub <- fish_ab %>%
   unite("site_year", c(SiteID, Year), sep="_", remove = F) %>%
   select(-Species, -Abundance, -Year) ## remove original abundances
-
+fish_ab_sub
 ## join new abundances
 fish_ab_int <- full_join(mediansx, fish_ab_sub, by = "site_year")
 fish_ab_int <- fish_ab_int %>%
   rename(SiteID = SiteID.x) %>%
-  select(-SiteID.y)
+  select(-SiteID.y) %>%
+  distinct()
 
 names(fish_ab_int)
 head(fish_ab_int)
@@ -304,20 +272,6 @@ setdiff(fish_ab_rel_int$Species, trt$Species) # all matched!!!
 # make sure basin is a factor
 fish_ab_rel_int$HydroBasin<-as.factor(fish_ab_rel_int$HydroBasin)
 
-### define traits groups
-resource <- trt %>%
-  select(Species, EdHd:BlBd)
-
-dispersal <- trt %>%
-  select(Species, AVG_MXL, HdBd:CFdCPd)
-
-reproduction <- trt %>%
-  select(Species, AVG_LMAT:AVG_EGGSIZE, AVG_RGUILD_ORD)
-
-envPref <- trt %>%
-  select(Species, Tp_pref:Q_pref)
-
-
 ### format fish abundances
 fish_ab2 <- fish_ab_rel_int
 
@@ -327,6 +281,11 @@ fish_ab2$site_seas_year<-paste(fish_ab2$SiteID, fish_ab2$Month,fish_ab2$Year, se
 
 fish_mat2<-dcast(fish_ab2, site_seas_year  ~ Species, value.var="RelAbundanceSiteYear", fun.aggregate = sum)
 names(fish_ab2)
+
+## format abundance for new function cmw
+fish_abun <- fish_ab2 %>%
+  select(Species:Year, RelAbundanceSiteYear)
+
 # add  columns of year, site and seasons to the fish_mat2 matrix using "colsplit"
 # Some sites have NAs on season; season values with NAs are pasted but turned into character#
 fish_mat3<-cbind(colsplit(fish_mat2$site_seas_year,"_", c("site","month", "year")),fish_mat2)
@@ -340,141 +299,88 @@ which((duplicated(fish_mat3$site_year)==TRUE)) ### no sites sampled twice in a y
 #assign row names to the final fish abund matrix
 row.names(fish_mat3)<-fish_mat3$site_year
 sum(is.na(fish_mat3)) ## 1262
-write_csv(fish_mat3, here("input_data", "Bio", "fish_mat3.csv"))
 
-
-### merge with traits - food
-
-## functcomp requires spp and site names to be row names and column names etc, and the df should not contain other info ##
-resource<- resource[order(resource$Species),] # sort species names in the trait df (they should match the fish matrix)
-row.names(resource)<-resource$Species
-resource$Species<-NULL
-# om_resource$number_nas<-NULL
-
-head(resource) ## traits per species
-head(fish_mat3) ### abundance of species per site year
-names(fish_mat3)
+write.csv(fish_mat3, "input_data/Bio/fish_mat3_KI.csv")
 dim(fish_mat3)
+
+
+# Community weighted means and Variance------------------------------------------------
+head(trt)
+
+trt_sub <- trt %>% 
+  select(Species, AVG_MXL, AVG_FECUND, Tp_pref, Q_pref)
+
+trt_sub <- trt_sub[order(trt_sub$Species),] # sort species names in the trait df (they should match the fish matrix)
+row.names(trt_sub)<-trt_sub$Species
+trt_sub$Species<-NULL
 
 # # create a "clean" df (called fish for traits "fish_fortr") with fish abundance for the functcomp command (weighting traits by spp relative abund)
 fish_fortrt<-fish_mat3[,c(5:202)]
 row.names(fish_fortrt)<-fish_mat3$site_year
-dim(fish_fortrt)
-dim(resource)
+
 ## computes the functional composition of functional traits, by community weighted mean
-res_matrix<-functcomp(resource, as.matrix(fish_fortrt), CWM.type = "dom")  
-head(res_matrix)
+trt_matrix<-functcomp(trt_sub, as.matrix(fish_fortrt), CWM.type = "dom")  
+head(trt_matrix)
 
-res_matrix <- res_matrix %>%
-  mutate(SiteYear = rownames(res_matrix)) %>%
-  pivot_longer(EdHd:BlBd, names_to="Trait", values_to= "Values") %>%
-  mutate(TraitGroup = "FoodAquisition", TraitType = "Effect") 
+## Alain function
+library(ecocom)
 
+## subset again as Species removed above
+trt_sub <- trt %>% 
+  select(Species, AVG_MXL, AVG_FECUND, Tp_pref, Q_pref)
 
-## functcomp requires spp and site names to be row names and column names etc, and the df should not contain other info ##
-dispersal<- dispersal[order(dispersal$Species),] # sort species names in the trait df (they should match the fish matrix)
-row.names(dispersal)<-dispersal$Species
-dispersal$Species<-NULL
-# om_dispersal$number_nas<-NULL
+head(fish_abun)
+head(trt_sub)
 
-head(dispersal) ## traits per species
-head(fish_mat3) ### abundance of species per site year
-names(fish_mat3)
-dim(fish_mat3)
+## join abundance with traits
 
-# # create a "clean" df (called fish for traits "fish_fortr") with fish abundance for the functcomp command (weighting traits by spp relative abund)
-fish_fortrt<-fish_mat3[,c(5:202)]
-row.names(fish_fortrt)<-fish_mat3$site_year
-dim(fish_fortrt)
-dim(dispersal)
-## computes the functional composition of functional traits, by community weighted mean
-disp_matrix<-functcomp(dispersal, as.matrix(fish_fortrt), CWM.type = "dom")  
-head(disp_matrix)
-disp_matrix <- disp_matrix %>%
-  mutate(SiteYear = rownames(disp_matrix)) %>%
-  pivot_longer(cols = c(AVG_MXL, HdBd:CFdCPd), names_to="Trait", values_to= "Values") %>%
-  mutate(TraitGroup = "Dispersal", TraitType = "Both")
+abun_traits <- full_join(fish_abun, trt_sub, by="Species")
 
-## functcomp requires spp and site names to be row names and column names etc, and the df should not contain other info ##
-reproduction<- reproduction[order(reproduction$Species),] # sort species names in the trait df (they should match the fish matrix)
-row.names(reproduction)<-reproduction$Species
-reproduction$Species<-NULL
-reproduction$AVG_RGUILD_ORD<-NULL #### need to fix this
-# om_reproduction$number_nas<-NULL
+head(comMean)
 
-head(reproduction) ## traits per species
-str(reproduction)
-head(fish_mat3) ### abundance of species per site year
-names(fish_mat3)
-dim(fish_mat3)
-str(fish_mat3)
+## community mean calculate
+comMean <- abun_traits %>%
+  rename(Abundance = RelAbundanceSiteYear) %>%
+  pivot_longer(AVG_MXL:Q_pref, names_to = "Trait", values_to = "Value") %>%
+  group_by(SiteID, Year, site_year, Trait) %>%
+  summarise(CWM = calc_cw_mean(trait = Value, weight = Abundance), 
+                               CWV = calc_cw_variance(trait = Value, weight = Abundance))
 
-# # create a "clean" df (called fish for traits "fish_fortr") with fish abundance for the functcomp command (weighting traits by spp relative abund)
-fish_fortrt<-fish_mat3[,c(5:202)]
-row.names(fish_fortrt)<-fish_mat3$site_year
-dim(fish_fortrt)
-dim(reproduction)
-## computes the functional composition of functional traits, by community weighted mean
-repro_matrix<-functcomp(reproduction, as.matrix(fish_fortrt), CWM.type = "dom")  
+write.csv(comMean, "output_data/01_cwm_cwv_four_single_traits.csv")
 
-repro_matrix <- repro_matrix %>%
-  mutate(SiteYear = rownames(repro_matrix)) %>%
-  # mutate(AVG_RGUILD_ORD = as.numeric(AVG_RGUILD_ORD)) %>%
-  pivot_longer(cols= c(AVG_LMAT:AVG_EGGSIZE), names_to="Trait", values_to= "Values") %>%
-  mutate(TraitGroup = "Reproduction", TraitType = "Response")
+## add main site info back
 
-## functcomp requires spp and site names to be row names and column names etc, and the df should not contain other info ##
-envPref<- envPref[order(envPref$Species),] # sort species names in the trait df (they should match the fish matrix)
-row.names(envPref)<-envPref$Species
-envPref$Species<-NULL
-# om_envPref$number_nas<-NULL
-
-head(envPref) ## traits per species
-head(fish_mat3) ### abundance of species per site year
-names(fish_mat3)
-dim(fish_mat3)
-
-# # create a "clean" df (called fish for traits "fish_fortr") with fish abundance for the functcomp command (weighting traits by spp relative abund)
-fish_fortrt<-fish_mat3[,c(5:202)]
-row.names(fish_fortrt)<-fish_mat3$site_year
-dim(fish_fortrt)
-dim(envPref)
-## computes the functional composition of functional traits, by community weighted mean
-env_matrix<-functcomp(envPref, as.matrix(fish_fortrt), CWM.type = "dom")  
-env_matrix <- env_matrix %>%
-  mutate(SiteYear = rownames(env_matrix)) %>%
-  pivot_longer(cols= c(Tp_pref:Q_pref), names_to="Trait", values_to= "Values") %>%
-  mutate(TraitGroup = "EnvPreferences", TraitType = "Response")
-
-# combine all
-traitmatrix <- rbind(res_matrix, disp_matrix, repro_matrix, env_matrix)
-
-#### format
-site_year_basin<-fish_mat3[,c(1,3)]
-head(site_year_basin)
+head(fish_ab2)
+  
 fish_ab_t <- fish_ab2 %>%
-  select(HydroBasin, SiteID, Country)
-fish_ab_t <- na.omit(fish_ab_t)
-# add the basin id 
-site_year_basin$HydroBasin<- fish_ab_t$HydroBasin[match(site_year_basin$site, fish_ab_t$SiteID)]
-# add the origin
-site_year_basin$Country<-fish_ab_t$Country[match(site_year_basin$site, fish_ab_t$SiteID)]
-# add the year
-# site_year_basin<-cbind(site_year_basin, colsplit(site_year_basin$site_year, "_", c("SiteID", "Year")))
-names(site_year_basin)
-head(site_year_basin)
-site_year_basin <- site_year_basin %>%
-  mutate(SiteYear = rownames(site_year_basin))
+  select(HydroBasin, SiteID, Country, Latitude, Longitude) %>%
+  distinct() %>% na.omit()
 
-## add sites 
+head(fish_ab_t)
 
-traitmatrix<-merge(traitmatrix, site_year_basin, by="SiteYear")
-
-# traitmatrix <- merge(traitmatrix, FGroup, by = "Species")
-head(traitmatrix)
-dim(traitmatrix)
+comMeanGeo <- full_join(fish_ab_t, comMean, by = "SiteID")
+  
 
 ## save
-write.csv(traitmatrix, "output_data/01_trt_single_traits_interpolated.csv")
+write.csv(comMeanGeo, "output_data/01_trt_single_traits_interpolated_cwm_cmv.csv")
 
 
+# Check large means -------------------------------------------------------
+
+round(range(na.omit(comMeanGeo$CWM)), digits = 1)
+#  1.1e+00 3.7e+06
+
+
+test <- comMeanGeo %>%
+  filter(CWM > 100000)
+dim(test)  
+
+sites_to_check <- unique(test$SiteID)
+sites_to_check
+
+head(abun_traits)
+
+checksites <- abun_traits %>%
+  filter(SiteID %in% sites_to_check)
+
+## sites with high fecundity species have high mean and variance
