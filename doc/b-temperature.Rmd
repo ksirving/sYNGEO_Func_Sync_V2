@@ -29,6 +29,8 @@ no_filt_wt <- read_csv(here("input_data", "Env", "no_filtered_water_temperature.
 filt_wt <- read_csv(here("input_data", "Env", "filtered_water_temperature.csv"))  %>%
   filter(siteid %in% unique(fish_ab$site_id)) %>%
   filter(year(date) >= 1990)
+
+mv_avg_roll <- read_csv(here("input_data/Env/mv_avg_roll_water_tmp.csv"))
 ```
 
 ## Raw water temperature data
@@ -163,6 +165,21 @@ write_csv(
   here("input_data", "Env", "sites_water_air_tmean_av.csv")
 )
 ```
+
+- Lots of NA after 2005: 
+
+```{r}
+mv_avg_roll %>%
+  mutate(year = year(date)) %>%
+  group_by(siteid, year) %>%
+  summarise(
+    avg = mean(mv_avg_12m, na.rm = TRUE),
+    n_na = sum(is.na(mv_avg_12m))
+    ) %>%
+  ggplot(aes(x = year, y = n_na)) +
+  geom_smooth()
+```
+
 
 
 ## 
