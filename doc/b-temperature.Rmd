@@ -13,14 +13,91 @@ knitr::opts_chunk$set(echo = FALSE)
 ## target knits Rmds in their own session, so load libraries here.
 ## source("here::here(packages.R"))
 library(tidyverse)
+library(lubridate)
 library(here)
 ```
 
 ```{r load-targets, include=FALSE}
+fish_ab <- read_csv(here("input_data", "Bio", "fish_ab.csv")) %>%
+  janitor::clean_names()
 awt <- read_csv(here("input_data", "Env", "awt.csv")) %>%
   filter(year > 1980)
-fish_ab <- read_csv(here("input_data", "Bio", "fish_ab.csv"))
+no_filt_wt <- read_csv(here("input_data", "Env", "no_filtered_water_temperature.csv"))  %>%
+  filter(siteid %in% unique(fish_ab$site_id)) %>%
+  filter(year(date) >= 1990)
+  
+filt_wt <- read_csv(here("input_data", "Env", "filtered_water_temperature.csv"))  %>%
+  filter(siteid %in% unique(fish_ab$site_id)) %>%
+  filter(year(date) >= 1990)
+
+mv_avg_roll <- read_csv(here("input_data/Env/mv_avg_roll_water_tmp.csv"))
 ```
+
+## Raw water temperature data
+
+- Confirmation that water temperature goes to maximum
+  end of 2010:
+
+```{r}
+summary(no_filt_wt$date)
+```
+
+- We see a kind of a break between 1995 and 2000, the average temperature
+  increase from 8.25 to 8.6 celsius degrees. It might explain why so much
+  temperature are NA  
+
+```{r}
+no_filt_wt %>%
+  ggplot(aes(y = tmp, x = date)) +
+  geom_smooth()
+```
+
+## Filtered water temperature data 
+
+```{r}
+summary(filt_wt)
+```
+
+```{r}
+filt_wt %>%
+  group_by(date) %>%
+  summarise(
+    n = n(),
+    n_na = sum(is.na(tmp))
+    ) %>%
+  ggplot(aes(y = n, x = date)) +
+  geom_line() +
+  labs(y = "Number of sites")
+```
+
+```{r}
+ti <- no_filt_wt %>%
+  left_join(
+    filt_wt %>%
+      select(-tmp) %>%
+      mutate(excluded = FALSE),
+    by = c("siteid", "date")
+  ) %>%
+mutate(excluded = ifelse(is.na(excluded), TRUE, FALSE))
+
+```
+```{r}
+ti %>%
+  group_by(date) %>%
+  summarise(
+    n = n(),
+    n_na = sum(excluded)
+    ) %>%
+  ggplot(aes(y = n_na, x = date)) +
+  geom_line() +
+  labs(y = "Number of sites")
+```
+
+
+
+
+
+## Moving average dataset 
 
 - Keep only the site that are in the synchrony dataset:
 
@@ -89,6 +166,28 @@ write_csv(
 )
 ```
 
+- Lots of NA after 2005: 
+
+```{r}
+mv_avg_roll %>%
+  mutate(year = year(date)) %>%
+  group_by(siteid, year) %>%
+  summarise(
+    avg = mean(mv_avg_12m, na.rm = TRUE),
+    n_na = sum(is.na(mv_avg_12m))
+    ) %>%
+  ggplot(aes(x = year, y = n_na)) +
+  geom_smooth()
+```
+
+
+
+## 
+
+```{r}
+formated_wt %>%
+
+```
 
 
 
