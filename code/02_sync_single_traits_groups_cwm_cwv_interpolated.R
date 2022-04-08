@@ -54,7 +54,7 @@ compute_synchrony(cov(sync_mat))
 async_mat <- sync_mat
 async_mat[, 1] <- rev(async_mat[, 1])
 compute_synchrony(cov(async_mat))
-```
+
 
 # between all sites - within biogeogrpahic region -----------------------
 
@@ -71,12 +71,12 @@ region = 3
   for (region in 1:length(regionsID)) {
     
     basindata<-all_groups[all_groups$BiogeoRegion==regionsID[region],]
-    head(basindata)
+    # head(basindata)
     basindata <- basindata[order(basindata$SiteID),]
     
     ### loop over axis
     Ntraits<-unique(basindata$Trait)
-    Ntraits
+    # Ntraits
     
     for (ax in 1: length(Ntraits)) {
       
@@ -84,7 +84,9 @@ region = 3
       
       trait_data<-basindata[basindata$Trait==unique(basindata$Trait)[ax],]
       # sum(is.na(trait_data))
-      head(trait_data)
+      # head(trait_data)
+      years <- unique( trait_data$Year)
+      # years
       
       # make df wide - mean
       trait_CWM  <- trait_data %>% 
@@ -116,11 +118,11 @@ region = 3
           )
         )
         
-        compute_synchrony(sync_mat)
+        compute_synchrony(cov(sync_mat))
       })
       
-     
-      
+      # head(synchrony)
+  
       ### functional diversity: Temporal average of Community Weighted Variance
       
       cc <- expand.grid(colnames(trait_CWV), colnames(trait_CWV), KEEP.OUT.ATTRS = FALSE)
@@ -186,6 +188,8 @@ region = 3
 synchrony_axis <- synchronyx %>%
   rename(Site_ID1 = Var1, Site_ID2 = Var2) %>%
   mutate(Pair = paste0(Site_ID1, ".", Site_ID2))
+
+## negative values in distance
 
 head(synchrony_axis)
 length(unique(synchrony_axis$Trait))
