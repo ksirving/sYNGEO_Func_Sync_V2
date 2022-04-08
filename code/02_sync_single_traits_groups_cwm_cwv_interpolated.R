@@ -196,3 +196,11 @@ length(unique(synchrony_axis$Region))
 write.csv(synchrony_axis, "output_data/sync/02_between_all_sites_single_traits_CWM_CWV.csv")
 
 
+
+# Climate synchrony-------------------------------------------------------------------------
+
+
+# Flow synchrony ----------------------------------------------------------
+
+
+

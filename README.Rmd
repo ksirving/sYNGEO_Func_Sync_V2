@@ -35,12 +35,8 @@ Produces CWMs and CMVs (interpolated) for all traits and groups
 # 02_sync_single_traits_groups_cwm_cwv_interpolated.R
 
 calculates synchrony, functional distance and diversity for each trait in each region
+calculates synchrony in environmental variables
 
-# 02b_sync_single_traits_groups_eff_resp_interpolated.R
-
-calculates synchrony for single traits
-within site, between site, jackknife (leaving one year out)
-also includes synchrony calculation for temperature and flow
 
 ## 03a_dummy_connectivity_variable_interpolated.R
 
@@ -51,7 +47,7 @@ join on water course distance for testing
 ## 04_differences_in_synchrony.R
 
 calculates the differences in synchrony from the calculation of sync using all years and the jack knife leave one out (LOO)
-some NAs in df, from where correaltion couldn't be calculated in scrip 02a/b
+some NAs in df, from where correaltion couldn't be calculated in script 02a/b
 
 ## 05a_figures_single_traits.R
 
