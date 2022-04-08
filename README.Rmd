@@ -16,8 +16,7 @@ knitr::opts_chunk$set(
 # Code index
 
 1. 01_single_traits_interpolated_abundances_new_cwm.R
-1. 02a_sync_trait_ord_groups_eff_resp_interpolated.R
-1. 02b_sync_single_traits_groups_eff_resp_interpolated.R
+2. 02_sync_single_traits_groups_cwm_cwv_interpolated.R
 1. 03a_dummy_connectivity_variable_interpolated.R
 1. 04_differences_in_synchrony.R
 1. 05a_figures_single_traits.R
@@ -31,13 +30,11 @@ cleans and interpolates abundances.
 Produces CWMs and CMVs (interpolated) for all traits and groups
 
 
-### output_data from scripts 02a & 02b & 3a & 3b are saved into output_data/sync under .gitignore
+### output_data from scripts 02 & 3a & 3b are saved into output_data/sync under .gitignore
 
-# 02a_sync_trait_ord_groups_eff_resp_interpolated.R
+# 02_sync_single_traits_groups_cwm_cwv_interpolated.R
 
-calculates synchrony with ordination scores
-within site, between site, jackknife (leaving one year out)
-
+calculates synchrony, functional distance and diversity for each trait in each region
 
 # 02b_sync_single_traits_groups_eff_resp_interpolated.R
 
