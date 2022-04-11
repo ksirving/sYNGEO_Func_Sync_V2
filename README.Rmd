@@ -112,10 +112,20 @@ compute_synchrony(cov(async_mat))
 
 See [doc/b-temperature.html](https://github.com/ksirving/sYNGEO_Func_Sync_V2/blob/main/doc/b-temperature.html)
 
+Water temperature data had too much NA starting from 2008 to be useful.
+
+- Below is the air temperature:
+  - annual moving average: `annual_avg`
+  - summer moving average (june-july-august for all site but the ones located in
+    Australia: november-december-january): `summer_avg`
+
+
 ```{r}
 library(tidyverse)
-sites_water_air_tmean_av <- read_csv(
-  here::here("input_data", "Env", "sites_water_air_tmean_av.csv")
+air_annual_and_summer_avg <- read_csv(
+  here("input_data", "Env", "air_annual_and_summer_avg.csv")
 )
+
+head(air_annual_and_summer_avg)
 ```
 

@@ -5,24 +5,19 @@
 
 # Code index
 
-1.  01a\_trait\_ordination\_interpolated\_abundances.R
-2.  01b\_single\_traits\_interpolated\_abundances.R
-3.  02a\_sync\_trait\_ord\_groups\_eff\_resp\_interpolated.R
-4.  02b\_sync\_single\_traits\_groups\_eff\_resp\_interpolated.R
-5.  03a\_dummy\_connectivity\_variable\_interpolated.R
-6.  04\_differences\_in\_synchrony.R
-7.  05a\_figures\_single\_traits.R
-8.  05b\_figures\_ordination.R
+1.  01\_single\_traits\_interpolated\_abundances\_new\_cwm.R
+2.  02a\_sync\_trait\_ord\_groups\_eff\_resp\_interpolated.R
+3.  02b\_sync\_single\_traits\_groups\_eff\_resp\_interpolated.R
+4.  03a\_dummy\_connectivity\_variable\_interpolated.R
+5.  04\_differences\_in\_synchrony.R
+6.  05a\_figures\_single\_traits.R
+7.  05b\_figures\_ordination.R
 
-# 01a\_trait\_ordination\_interpolated\_abundances.R
+# 01\_single\_traits\_interpolated\_abundances\_new\_cwm.R
 
 Takes raw abundance data and traits for each species cleans and
-interpolates abundances. produces ordinations for each trait group
-
-# 01b\_single\_traits\_interpolated\_abundances.R
-
-same as above but with single traits Produces CWMs (interpolated) for
-all traits and groups
+interpolates abundances. Produces CWMs and CMVs (interpolated) for all
+traits and groups
 
 ### output\_data from scripts 02a & 02b & 3a & 3b are saved into output\_data/sync under .gitignore
 
@@ -76,14 +71,14 @@ trait <- rnorm(n = 10, mean = 10, sd = 3)
 
 # Compute the moments of trait distribution
 calc_cw_moments(trait = trait, weight = abun)
-#>      mean  variance  skewness  kurtosis 
-#> 9.7561220 4.4853780 0.3346265 2.2461459
+#>     mean variance skewness kurtosis 
+#> 9.642994 6.973897 0.767339 2.440987
 
 # 
 calc_cw_mean(trait = trait, weight = abun)
-#> [1] 9.756122
+#> [1] 9.642994
 calc_cw_variance(trait = trait, weight = abun)
-#> [1] 4.485378
+#> [1] 6.973897
 ```
 
 ## Synchrony
@@ -125,17 +120,38 @@ compute_synchrony(cov(async_mat))
 See
 [doc/b-temperature.html](https://github.com/ksirving/sYNGEO_Func_Sync_V2/blob/main/doc/b-temperature.html)
 
+Water temperature data had too much NA starting from 2008 to be useful.
+
+  - Below is the air temperature:
+      - annual moving average: `annual_avg`
+      - summer moving average (june-july-august for all site but the
+        ones located in Australia: november-december-january):
+        `summer_avg`
+
+<!-- end list -->
+
 ``` r
 library(tidyverse)
-sites_water_air_tmean_av <- read_csv(
-  here::here("input_data", "Env", "sites_water_air_tmean_av.csv")
+air_annual_and_summer_avg <- read_csv(
+  here("input_data", "Env", "air_annual_and_summer_avg.csv")
 )
-#> Rows: 24508 Columns: 4
-#> ── Column specification ──────────────────────────────────────────────────
+#> Rows: 8172 Columns: 4
+#> ── Column specification ─────────────────────────────────────────
 #> Delimiter: ","
 #> chr (1): siteid
-#> dbl (3): year, air, water
+#> dbl (3): year, annual_avg, summer_avg
 #> 
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+head(air_annual_and_summer_avg)
+#> # A tibble: 6 × 4
+#>   siteid  year annual_avg summer_avg
+#>   <chr>  <dbl>      <dbl>      <dbl>
+#> 1 S10015  2003       4.4        16.2
+#> 2 S10015  2004       4.96       14.6
+#> 3 S10015  2005       4.9        15.7
+#> 4 S10015  2006       5.48       16.9
+#> 5 S10015  2007       5.88       15.7
+#> 6 S10015  2008       5.5        14.5
 ```

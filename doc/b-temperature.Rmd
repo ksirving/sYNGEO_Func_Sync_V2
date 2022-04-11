@@ -31,6 +31,15 @@ filt_wt <- read_csv(here("input_data", "Env", "filtered_water_temperature.csv"))
   filter(year(date) >= 1990)
 
 mv_avg_roll <- read_csv(here("input_data/Env/mv_avg_roll_water_tmp.csv"))
+air_mv_avg_roll <- read_csv(here("input_data/Env/mv_avg_roll_air_temp.csv")) %>%
+  filter(
+    siteid %in% unique(fish_ab$site_id),
+    year(date) >= (min(fish_ab$year) - 1) &
+      year(date) <= (max(fish_ab$year) + 1)
+  )
+
+# site location
+load(here("input_data/Env/site_desc_loc.rda"))
 ```
 
 ## Raw water temperature data
@@ -184,9 +193,40 @@ mv_avg_roll %>%
 
 ## 
 
-```{r}
-formated_wt %>%
+- For air temperature, we computed annual average based on 12 months moving
+  windows, as well as summer average over three months (July (june-july-august)
+  but winter (novembre-decembre-january) for Australia).
 
+```{r}
+air_annual_and_summer_avg <- air_mv_avg_roll %>%
+  left_join(site_desc_loc %>% select(siteid, country), by = "siteid") %>%
+  mutate(
+    year = year(date),
+    month = month(date)
+    ) %>%
+  group_by(siteid, year) %>%
+  summarise(
+    annual_avg = mean(mv_avg_12m),
+    summer_avg = mean(mv_avg_3m[month == ifelse(country != "AUS", 7, 12)]),
+    .groups = "drop"
+  )
+
+# Check
+mask_mv_avg <- air_mv_avg_roll$siteid == "S10015" & year(air_mv_avg_roll$date) == 2004
+mask_annual_summer_avg <- air_annual_and_summer_avg$siteid == "S10015" &
+  air_annual_and_summer_avg$year == 2004
+## Test annual avg:
+stopifnot(mean(air_mv_avg_roll[mask, ][["mv_avg_12m"]]) ==
+  air_annual_and_summer_avg[mask_annual_summer_avg, ][["annual_avg"]])
+## Test summer avg:
+stopifnot(air_mv_avg_roll[mask, ][["mv_avg_3m"]][7] ==
+  air_annual_and_summer_avg[mask_annual_summer_avg, ][["summer_avg"]])
+## All good
+
+write_csv(
+  air_annual_and_summer_avg,
+  file = here("input_data", "Env", "air_annual_and_summer_avg.csv")
+)
 ```
 
 

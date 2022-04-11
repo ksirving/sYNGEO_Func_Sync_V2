@@ -44,3 +44,7 @@ file.copy(
   overwrite = TRUE
 )
 
+# Export avg mv window air temperature data for Katie
+tar_load(at_mv_avg_roll)
+write_csv(at_mv_avg_roll,
+  "~/Documents/post-these/isu/sYNGEO_Func_Sync_V2/input_data/Env/mv_avg_roll_air_temp.csv")
