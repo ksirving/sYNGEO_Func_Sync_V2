@@ -255,6 +255,23 @@ fish_ab_rel_int <- fish_ab_rel_int %>%
   filter(!Species %in% RSp)
 
 RSp
+
+## find seasons to check all in summer
+
+head(fish_ab_rel_int)
+unique(fish_ab_rel_int$Month)
+
+## filter winter months - are they all australia?
+
+months_check <- fish_ab_rel_int %>%
+  filter(Month %in% c(10,11,12)) 
+
+unique(months_check2$Country)
+
+months_check2 <- fish_ab_rel_int %>%
+  filter(!Month %in% c(10,11,12))
+
+
 ## filter trt to same species as fish df
 
 fish_sp <- unique(fish_ab_rel_int$Species)
@@ -285,6 +302,8 @@ names(fish_ab2)
 ## format abundance for new function cmw
 fish_abun <- fish_ab2 %>%
   select(Species:Year, RelAbundanceSiteYear)
+
+head(fish_abun)
 
 # add  columns of year, site and seasons to the fish_mat2 matrix using "colsplit"
 # Some sites have NAs on season; season values with NAs are pasted but turned into character#
