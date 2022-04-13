@@ -290,6 +290,7 @@ eu_sync <- synchrony_axis
 interDF <- rbind(oc_sync, usa_sync, eu_sync)
 
 
+
 ## take only distance columns
 sync_sub <- syncsites %>%
   dplyr::select(Connectivity:MeanLon)
@@ -298,6 +299,21 @@ sync_sub <- syncsites %>%
 interDF <- interDF %>%
   # dplyr::select(-X) %>%
   mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
+
+## get all sites to find missing flow sites
+# temp_pairs <- unique(interDF$Pair)
+# 
+# temp_sites1 <- unique(interDF$Site_ID1)
+# temp_sites2 <- unique(interDF$Site_ID2)
+# 
+# sum(temp_sites1 %in% temp_sites2)
+# 
+# temp_sites <- c(temp_sites1, temp_sites2)
+# length(temp_sites)
+# length(unique(temp_sites))
+# 
+# temp_sites <- unique(temp_sites)
+
 
 ## join
 all_sync <- left_join(interDF, sync_sub, by = "Pair")
@@ -338,6 +354,28 @@ sync_sub <- syncsites %>%
 interDF <- interDF %>%
   # dplyr::select(-X) %>%
   mutate(Pair = paste(Site_ID1, ".", Site_ID2, sep="")) 
+
+## find missing flow sites
+# flow_pairs <- unique(interDF$Pair)
+# 
+# flow_sites1 <- unique(interDF$Site_ID1)
+# flow_sites2 <- unique(interDF$Site_ID2)
+# 
+# sum(flow_sites1 %in% flow_sites2)
+# 
+# flow_sites <- c(flow_sites1, flow_sites2)
+# length(flow_sites)
+# length(unique(flow_sites))
+# 
+# flow_sites <- unique(flow_sites)
+# 
+# ind <- temp_sites %in% flow_sites
+# 
+# missing_index <- which(ind == F)
+# 
+# missing_sites <- flow_sites[missing_index]
+
+
 
 ## join
 all_sync <- left_join(interDF, sync_sub, by = "Pair")
