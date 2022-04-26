@@ -78,7 +78,6 @@ region = 3
     
     for (ax in 1: length(Ntraits)) {
       
-     
       
       trait_data<-basindata[basindata$Trait==unique(basindata$Trait)[ax],]
       # sum(is.na(trait_data))
@@ -146,7 +145,7 @@ region = 3
       ### functional distance: Difference in temporal average of Community Weighted Mean
       
       cc <- expand.grid(colnames(trait_CWM), colnames(trait_CWM), KEEP.OUT.ATTRS = FALSE)
-      
+
       distance <- sapply(seq_len(nrow(cc)), function(k) {
         i <- cc[k,1]
         j <- cc[k,2]
@@ -160,7 +159,7 @@ region = 3
           )
         )
         
-        mean(1-dist_mat[,1]/dist_mat[,2])
+        mean(dist_mat[,1]/dist_mat[,2])
         
       })
       

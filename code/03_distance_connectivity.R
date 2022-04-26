@@ -377,7 +377,7 @@ watersites <- watersites %>%
   mutate(WCDistkm = DistMetersWater/1000)
   
 ## upload 
-load(file = "output_data/sync/03_sync_data_funcgroup_traitgroup_similarity_euclidean_dist_interpolated.RData")
+load(file = "output_data/sync/03_sync_traits_CWM_CWV_distances.RData")
 
 head(syncDF)
 
@@ -385,12 +385,12 @@ unique(syncDF$Trait)
 syncDF <- left_join(syncDF, watersites, by = "Pair") 
 
 syncDF <- syncDF %>%
-  filter(Connectivity == 1, Trait %in% c("AVG_MXL", "AVG_FECUND", "Tp_pref")) %>%
+  filter(Connectivity == 1, Trait %in% c("AVG_MXL", "AVG_FECUND", "Tp_pref", "Q_pref")) %>%
   mutate(Euclid_Dist_KM = Euclid_Dist_Meters/1000 ) %>%
   pivot_longer(c(Euclid_Dist_KM, WCDistkm), names_to = "Dist_Type", values_to = "KM")
 
 
-sm1a <- ggplot(syncDF, aes(x=KM, y=Correlation, color = Dist_Type)) +
+sm1a <- ggplot(syncDF, aes(x=KM, y=synchrony, color = Dist_Type)) +
   geom_smooth(method = "lm") +
   facet_wrap(~Trait) +
   scale_color_discrete(name = "Distance Type", labels = c("Euclidean", "Water Course")) +
@@ -399,7 +399,7 @@ sm1a <- ggplot(syncDF, aes(x=KM, y=Correlation, color = Dist_Type)) +
 sm1a
 
 
-file.name1 <- paste0(out.dir, "Euclid_v_waterCourse_distance_3_traits.jpg")
+file.name1 <- paste0(out.dir, "Euclid_v_waterCourse_distance_4_traits.jpg")
 ggsave(sm1a, filename=file.name1, dpi=300, height=5, width=6)
 
 

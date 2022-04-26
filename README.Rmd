@@ -17,10 +17,9 @@ knitr::opts_chunk$set(
 
 1. 01_single_traits_interpolated_abundances_new_cwm.R
 2. 02_sync_single_traits_groups_cwm_cwv_interpolated.R
-1. 03a_dummy_connectivity_variable_interpolated.R
-1. 04_differences_in_synchrony.R
-1. 05a_figures_single_traits.R
-1. 05b_figures_ordination.R
+3. 03_distance_connectivity.R
+4. 04_statistical_analysis.R
+
 
 
 # 01_single_traits_interpolated_abundances_new_cwm.R
@@ -30,7 +29,7 @@ cleans and interpolates abundances.
 Produces CWMs and CMVs (interpolated) for all traits and groups
 
 
-### output_data from scripts 02 & 3a & 3b are saved into output_data/sync under .gitignore
+### output_data from scripts 02 & 03 are saved into output_data/sync under .gitignore
 
 # 02_sync_single_traits_groups_cwm_cwv_interpolated.R
 
@@ -38,25 +37,18 @@ calculates synchrony, functional distance and diversity for each trait in each r
 calculates synchrony in environmental variables
 
 
-## 03a_dummy_connectivity_variable_interpolated.R
+## 03_distance_connectivity.R
 
 calculates distances and connectivity variable
 joins to all synchrony datasets
 join on water course distance for testing
 
-## 04_differences_in_synchrony.R
+## 04_statistical_analysis.R
 
-calculates the differences in synchrony from the calculation of sync using all years and the jack knife leave one out (LOO)
-some NAs in df, from where correaltion couldn't be calculated in script 02a/b
+statistical model for drivers of synchrony
+all figures
 
-## 05a_figures_single_traits.R
 
-create figures for single trait synchrony and env variables. for overall synchrony and contribution of years (leave one out, LOO)
-
-## 05b_figures_ordination.R
-
-create figures for ordination synchrony and env variables. for overall synchrony and contribution of years (leave one out, LOO)
-also includes temp and flow LOO figures
 
 
 # Computation:
