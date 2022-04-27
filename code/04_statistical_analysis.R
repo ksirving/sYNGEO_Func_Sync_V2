@@ -64,6 +64,39 @@ head(allsync)
 
 unique(allsync$Trait)
 
+
+# Histograms - data exploration -------------------------------------------
+library(scales)
+head(allsync)
+
+## take only env vars and conncetivity - format for plots
+env_data <- allsync %>%
+  select(c(Connectivity, annual_avg:DistKM)) %>%
+  distinct() %>%
+  pivot_longer(annual_avg:DistKM, names_to = "Variable", values_to = "Value") %>%
+  mutate(Connectivity = factor(Connectivity, levels = c(1, 0))) %>%
+  filter(!Variable %in% c("qmin_raw", "qmax_raw")) %>%
+  mutate(Variable = factor(Variable, levels = c("annual_avg", "summer_avg", "qmean_raw", "DistKM"))) 
+
+## define names
+supp.labs <- c("Within Basin", "Between Basin")
+names(supp.labs) <- c("1","0")
+
+## define labels
+temp.labs <- c("Annual Temp", "Summer Temp", "Annual Mean Q"," Distance (km)")
+names(temp.labs) <- c("annual_avg", "summer_avg", "qmean_raw", "DistKM")
+
+H1 <- ggplot(env_data, aes(x=Value)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept = mean(Value)), linetype = "dashed", size = 0.6) +
+  facet_grid(Connectivity~Variable, scales = "free", labeller = labeller(Connectivity = supp.labs, Variable = temp.labs) ) +
+  scale_y_continuous(name="Frequency", labels = comma) 
+
+H1
+
+file.name1 <- paste0(out.dir, "Env_Hists.jpg")
+ggsave(H1, filename=file.name1, dpi=300, height=5, width=6)
+
 # Model: functional synchrony --------------------------------------------------------
 
 ## analysis: functional synchrony ~ distance + connectivity + functional diversity + environmental synchrony
