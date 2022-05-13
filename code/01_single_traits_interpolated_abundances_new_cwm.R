@@ -98,7 +98,7 @@ trt_cor <- trt %>%
 head(trt_cor)
 # ?cor
 cor_mat <- cor(trt_cor,  use = "pairwise.complete.obs")
-
+cor_mat
 
 write.csv(cor_mat, "output_data/01b_trait_correlation_logged.csv")
 
@@ -106,9 +106,66 @@ write.csv(cor_mat, "output_data/01b_trait_correlation_logged.csv")
 write.csv(trt, "output_data/01_traits_corrected.csv")
 
 
-# Abundances --------------------------------------------------------------
+#  cor traits separated by region -----------------------------------------
 
+head(trt)
 fish_ab <- read.csv("input_data/Bio/fishdata_selection_basins_same_time_window_10262020.csv")
+
+## select only species and region to match with traits
+fish_ab_sub <- fish_ab %>% 
+  mutate(BiogeoRegion = case_when(Country %in% c("FIN", "SWE", "GBR", "ESP", "FRA") ~ "Europe",
+                                  Country== "AUS" ~ "Oceania", Country == "USA" ~ "USA")) %>%
+  select(Species, BiogeoRegion) %>% distinct()
+head(fish_ab_sub)
+
+head(trt)
+
+trt_region <- left_join(fish_ab_sub, trt, by = "Species")
+head(trt_region)
+
+## check correlation of logged traits
+
+## subset to region
+EurTrt <- trt_region %>% filter(BiogeoRegion == "Europe")
+AusTrt <- trt_region %>% filter(BiogeoRegion == "Oceania")
+USATrt <- trt_region %>% filter(BiogeoRegion == "USA")
+
+EurTrt_cor <- EurTrt %>%
+  select(-AVG_Troph, -AVG_RGUILD_ORD, -Species, -BiogeoRegion, -number_nas)
+
+head(EurTrt_cor)
+# ?cor
+cor_mat <- cor(EurTrt_cor,  use = "pairwise.complete.obs")
+
+
+write.csv(cor_mat, "output_data/01b_trait_correlation_logged_Eur.csv")
+
+# fecundity  & body size >0.7
+
+AusTrt_cor <- AusTrt %>%
+  select(-AVG_Troph, -AVG_RGUILD_ORD, -Species, -BiogeoRegion, -number_nas)
+
+head(AusTrt_cor)
+# ?cor
+cor_mat <- cor(AusTrt_cor,  use = "pairwise.complete.obs")
+
+write.csv(cor_mat, "output_data/01b_trait_correlation_logged_Aus.csv")
+
+# fecundity  & body size >0.8
+
+USATrt_cor <- USATrt %>%
+  select(-AVG_Troph, -AVG_RGUILD_ORD, -Species, -BiogeoRegion, -number_nas)
+
+head(USATrt_cor)
+# ?cor
+cor_mat <- cor(USATrt_cor,  use = "pairwise.complete.obs")
+
+write.csv(cor_mat, "output_data/01b_trait_correlation_logged_USA.csv")
+
+# fecundity  & body size >0.8
+## 
+
+# Abundances --------------------------------------------------------------
 
 head(fish_ab)
 str(fish_ab)
@@ -146,6 +203,9 @@ remove_sites ## sites to be removed
 ## remove from main DF
 fish_ab  <- fish_ab %>%
   filter(!SiteID %in% remove_sites)
+
+head(fish_ab)
+
 # write_csv(fish_ab, here("input_data", "Bio", "fish_ab.csv"))
 
 ## look at abundance per site over all years
