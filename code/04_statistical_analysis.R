@@ -165,7 +165,9 @@ cor(USASyncWide, use = "complete.obs")
 sizeSync <- EurSync %>%
   filter(Trait == "AVG_MXL")
 
-save(sizeSync, file = "output_data/02_europe_body_size_data_for_model_explo.RData")
+# save(sizeSync, file = "output_data/02_europe_body_size_data_for_model_explo.RData")
+
+load( file = "output_data/02_europe_body_size_data_for_model_explo.RData") ## sizeSync
 
 head(sizeSync)
 fs <- sizeSync$Sync ## functional synchrony
