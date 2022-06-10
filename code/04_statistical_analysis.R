@@ -10,12 +10,20 @@ out.dir <- "/Users/katieirving/Documents/Documents - Katie’s MacBook Pro/git/s
 
 ## data
 
+## function to normalise data
+min_max_norm <- function(x) {
+  (x - min(na.omit(x))) / (max(na.omit(x)) - min(na.omit(x)))
+}
+
+
 ## functional synchrony
 
 load(file = "output_data/sync/03_sync_traits_CWM_CWV_distances.RData")
 funcsync <- syncDF %>%
   rename(Sync = synchrony) %>%
-  select(-X)
+  select(-X) %>%
+  filter(!Site_ID1 == Site_ID2)
+
 head(funcsync)
 
 ## environment synchrony
@@ -23,18 +31,19 @@ load(file="output_data/sync/03_sync_temp_distances.RData")
 tempsync <- syncDF %>%
   # mutate(SyncType = "TSync")  %>%
   pivot_wider(names_from = Metric, values_from = synchrony) %>%
-  filter(!Euclid_Dist_Meters == 0, !Similarity == 1) ## remove pairs comrised of same sites
+  filter( !Site_ID1 == Site_ID2)## remove pairs comrised of same sites
 head(tempsync)
 
 ## remove for now  - fix later if needed
 tempsync <- na.omit(tempsync)
 
 load(file="output_data/sync/03_sync_flow_distances.RData")
+
 flowsync <- syncDF %>%
   # mutate(SyncType = "QSync") %>%
   pivot_wider(names_from = Metric, values_from = synchrony) %>%
-  filter(!Euclid_Dist_Meters == 0, !Similarity == 1) ## remove pairs comrised of same sites
-
+  filter( !Site_ID1 == Site_ID2) ## remove pairs comrised of same sites
+  
 flowsync <- na.omit(flowsync)
 
 head(flowsync)
@@ -64,6 +73,24 @@ head(allsync)
 
 unique(allsync$Trait)
 
+## split into regions
+EurSync <- allsync %>% filter(Region == "Europe")
+AusSync <- allsync %>% filter(Region == "Oceania")
+USASync <- allsync %>% filter(Region == "USA")
+
+## split inot traits
+sizeSyncEU <- EurSync %>%
+  filter(Trait == "AVG_MXL")
+
+# save(sizeSyncEU, file = "output_data/02_europe_body_size_data_for_model_explo.RData")
+# load( file = "output_data/02_europe_body_size_data_for_model_explo.RData") ## sizeSyncEU
+
+sizeSyncAU <- AusSync %>%
+  filter(Trait == "AVG_MXL")
+
+sizeSyncUS <- USASync %>%
+  filter(Trait == "AVG_MXL")
+
 
 # Histograms - data exploration -------------------------------------------
 library(scales)
@@ -90,7 +117,7 @@ H1 <- ggplot(env_data, aes(x=Value)) +
   geom_histogram() +
   geom_vline(aes(xintercept = mean(Value)), linetype = "dashed", size = 0.6) +
   facet_grid(Connectivity~Variable, scales = "free", labeller = labeller(Connectivity = supp.labs, Variable = temp.labs) ) +
-  scale_y_continuous(name="Frequency", labels = comma) 
+  scale_y_continuous(name="Frequency", labels = temp.labs) 
 
 H1
 
@@ -160,30 +187,43 @@ cor(USASyncWide, use = "complete.obs")
 # Q_pref      0.2663859 0.1797223 1.0000000 0.1926675
 # Tp_pref     0.2312989 0.1775311 0.1926675 1.0000000
 
-# data distribution  and correlation  -------------------------------------------------------------
-
-sizeSync <- EurSync %>%
-  filter(Trait == "AVG_MXL")
-
-# save(sizeSync, file = "output_data/02_europe_body_size_data_for_model_explo.RData")
-
-load( file = "output_data/02_europe_body_size_data_for_model_explo.RData") ## sizeSync
-
-head(sizeSync)
-fs <- sizeSync$Sync ## functional synchrony
-
-d <- (sizeSync$Euclid_Dist_Meters)/1000 ## distance in KM
-
-c <- sizeSync$Connectivity
-
-dv <- sizeSync$diversity
-
-di <- sizeSync$distance
-
-tav <- sizeSync$annual_avg
 
 
-# Model exploration: LM -------------------------------------------------------
+
+
+# multicolinearality ------------------------------------------------------
+
+# install.packages("easystats", repos = "https://easystats.r-universe.dev")
+library("easystats")
+
+modEur <- lm(Sync~(Connectivity+diversity+DistKM+distance)+annual_avg, data = sizeSyncEU)
+summary(modEur)
+anova(modEur)
+check_collinearity(modEur)
+
+modUS <- lm(Sync~(Connectivity+diversity+DistKM+distance)+annual_avg, data = sizeSyncUS)
+summary(modUS)
+anova(modUS)
+check_collinearity(modUS) ## high VIF in diversity and annual temp, moderate VIF in DistKM
+
+modAU <- lm(Sync~(Connectivity+diversity+DistKM+distance)+annual_avg, data = sizeSyncAU)
+summary(modAU)
+anova(modAU)
+check_collinearity(modAU)
+
+
+head(sizeSyncEU)
+fs <- sizeSyncEU$Sync ## functional synchrony
+
+d <- sizeSyncEU$DistKM <- (sizeSyncEU$Euclid_Dist_Meters)/1000 ## distance in KM
+
+c <- sizeSyncEU$Connectivity
+
+dv <- sizeSyncEU$diversity_Norm
+
+di <- sizeSyncEU$distance_Norm
+
+tav <- sizeSyncEU$annual_avg
 
 ## check distribution, too many points for shapiro wilk 
 # install.packages("e1071")
@@ -193,121 +233,176 @@ skewness(d^(1/3)) ## 0.65 - mod skewed, NaN with log, -0.37 with cube root
 skewness(na.omit(dv)) ## 0.4 - ok
 skewness(na.omit(log(di))) ## 2.18 = highly skewed, with log transform = 0.07
 skewness(na.omit(tav^(1/2))) ## -0.95 = highly skewed negative, log makes it worse -1.17, cube root still bad -1.09, sq root bad -1.06
+# 
+# fs <- log(fs)+1
+# ## positively skewed
+# hist(d^(1/3))
+# hist(log(d))
+# 
+# d <- d^(1/3)
+# d <- log(DistKM)
+# ## ok
+# hist(dv)
+# hist(log(di)+1)
+# 
+# di <- log(di)+1
+# 
+# ## negatively skewed
+# hist(tav)
+# hist(log10(tav)+1)
+# hist(tav^(1/3))
 
-## positively skewed
-hist(d^(1/3))
 
-d <- d^(1/3)
+# Model exploration: LM -------------------------------------------------------
 
-## ok
-hist(dv)
-hist(log(di)+1)
+## normalising function
 
-di <- log(di)+1
+min_max_norm <- function(x) {
+  (x - min(na.omit(x))) / (max(na.omit(x)) - min(na.omit(x)))
+}
 
-## negatively skewed
-hist(tav)
-hist(log10(tav)+1)
-hist(tav^(1/3))
+## log transform in df
+
+sizeSyncEULog <- sizeSyncEU %>%
+  mutate(fs = log(Sync+1), 
+         d = log(DistKM+1),
+         dv = diversity,
+         di = log(distance+1),
+         tav = annual_avg,
+         c = Connectivity)  %>%
+  mutate(di_Norm = min_max_norm(di), dv_Norm = min_max_norm(dv)) ## normalise diversity & distance
+
+head(sizeSyncEULog)
+sum(is.na(unique(sizeSyncEULog$DistKM)))
+sum(sizeSyncEULog$DistKM == 0)
+
 
 ## correlation
 
-data_log <- cbind(fs,d,c,dv,di,tav)
+data_log <- sizeSyncEULog %>% ungroup() %>% select(fs, d,dv,di,tav, Connectivity)
 head(data_log)
 
-cor(data, use = "complete.obs")
+cor(data_log, use = "complete.obs")
 
-## distance km and avg temp = -0.82
-
-## removed distance
-
+## distance km and avg temp = -0.74
 
 ## estimate synchrony in traits based on functional distance, diversity, euclidean distance, connectivity and environmental synchrony
-head(data_log)
+
+## sync over distance to check normality
+
+modx <- lm(fs ~ d, data = sizeSyncEULog)
+plot(modx) ## big tails still
+summary(modx)
+anova(modx)
+
 ### simplest model
 
-mod1 <- lm(fs~c+dv+di+tav)
+mod1 <- lm(fs ~ c+d+dv_Norm + di_Norm +tav, data = sizeSyncEULog)
+check_collinearity(mod1)
 
 ## QQ plots
 plot(mod1) # qq has big tails
+plot(sizeSyncEULog$d, sizeSyncEULog$fs)
 
-summary(mod1) ## all significant 
-anova(mod1)
+summary(mod1) ## all significant, except KM
+anova(mod1) ### all significant
 
 ## interactions with environmental synchrony
-mod2 <- lm(fs~(c+dv+di)*tav)
-mod2a <- lm(log(fs)~(c+dv+di)*tav) ## log response to check, qq plot and r sq much worse
-# summary(mod2a)
+mod2 <- lm(fs~(d+c+dv_Norm+di_Norm)*tav, data = sizeSyncEULog)
 
-summary(mod2) ## connectivity and functional distance single effects not significant, functional diversity and env sync significant
-## but not interaction, functional distance interacts with environmental synchrony
-anova(mod2)
-
-summary(mod2)$coefficient ## functional diversity, av temp and interaction of functional distance and av temp significant
-
-qqnorm(mod2a$residuals)
-qqline(mod2a$residuals)
-## env sync is highly skewed with no help from log etc transformation
-## low R sq
-## median not far from zero but slightly left skewed - not predicting lower values as well?
-
-## box cox transfrmation
-library(MASS)
-
-bc <- boxcox(fs ~ tav)
-(lambda <- bc$x[which.max(bc$y)]) ##  1.070707
-
-mod3 <- lm(((fs^lambda-1)/lambda)~(c+dv+di)*tav)
+summary(mod2) ## all significant, except functional diversity
+anova(mod2) ### all significant, single effects and interactions
 
 
-summary(mod3)
-anova(mod3)
+min(na.omit(sizeSyncEULog$distance))
+max(na.omit(sizeSyncEULog$distance))
 
-summary(mod3)$coefficient 
+## simple figure synchrony over distance - logged values
+ggplot(data = sizeSyncEULog, aes(y=fs, x=d)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~Connectivity) +
+  scale_y_continuous(name="Synchrony (logged)") +
+  scale_x_continuous(name="Eucliean Distance (logged km)") 
 
-qqnorm(mod3$residuals)
-qqline(mod3$residuals) ## still way off normality
+head(sizeSyncEULog_long)
+names(sizeSyncEULog)
 
-## plot
-xseq <- seq(0, 1, length.out = 20) 
-coefs <- coef(mod2)
-title <- substitute("Multi Linear Regression")
-plot(xseq, coefs[1] + coefs[2] * xseq, type = "l", ylim = c(0, 1),
-     xlab = expression(italic(x)), ylab = expression(hat(italic(y))),
-     main = title, lwd = 2, col = "blue", cex.lab = 1.25, cex.main = 1.5)
+## multivariate figure - all vars over distance, non transformed and normalised values
+sizeSyncEU_long <- sizeSyncEULog %>%
+  mutate(distance_Norm = min_max_norm(distance), diversity_Norm = min_max_norm(diversity)) %>% ## normalise raw distance and diversity
+  pivot_longer(c(Sync, distance_Norm, diversity_Norm, annual_avg), values_to = "Values", names_to = "Variables")
 
-## reduce model
+ggplot(data = sizeSyncEU_long, aes(y=Values, x=DistKM, colour = Variables)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~Connectivity) +
+  scale_y_continuous(name="Synchrony") +
+  scale_x_log10(name="Eucliean Distance (km)") 
 
-mod3 <- lm(fs~(c + di)*tav)
 
-summary(mod3)
-summary(mod3)$coefficient
+## multivariate figure - all vars over distance, transformed and  normalised values
+sizeSyncEUlog_long <- sizeSyncEULog %>%
+  # mutate(distance_Norm = min_max_norm(distance), diversity_Norm = min_max_norm(diversity)) %>% ## normalise raw distance and diversity
+  pivot_longer(c(fs, di_Norm, dv_Norm, tav), values_to = "Values", names_to = "Variables")
+
+ggplot(data = sizeSyncEULog_long, aes(y=Values, x=DistKM, colour = Variables)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~Connectivity) +
+  scale_y_continuous(name="Synchrony") +
+  scale_x_log10(name="Eucliean Distance (km)") 
+
+
+
+#### other stuff
+# mod2a <- lm(log(fs)~(c+dv+di)*tav) ## log response to check, qq plot and r sq much worse
+# # summary(mod2a)
+# 
+# summary(mod2) ## connectivity and functional distance single effects not significant, functional diversity and env sync significant
+# ## but not interaction, functional distance interacts with environmental synchrony
+# anova(mod2)
+# 
+# summary(mod2)$coefficient ## functional diversity, av temp and interaction of functional distance and av temp significant
+# 
+# qqnorm(mod2a$residuals)
+# qqline(mod2a$residuals)
+# ## env sync is highly skewed with no help from log etc transformation
+# ## low R sq
+# ## median not far from zero but slightly left skewed - not predicting lower values as well?
+# 
+# ## box cox transfrmation
+# library(MASS)
+# 
+# bc <- boxcox(fs ~ tav)
+# (lambda <- bc$x[which.max(bc$y)]) ##  1.070707
+# 
+# mod3 <- lm(((fs^lambda-1)/lambda)~(c+dv+di)*tav)
+# summary(mod3)
+# anova(mod3)
+# 
+# summary(mod3)$coefficient 
+# 
+# qqnorm(mod3$residuals)
+# qqline(mod3$residuals) ## still way off normality
+# 
+# ## plot
+# xseq <- seq(0, 1, length.out = 20) 
+# coefs <- coef(mod2)
+# title <- substitute("Multi Linear Regression")
+# plot(xseq, coefs[1] + coefs[2] * xseq, type = "l", ylim = c(0, 1),
+#      xlab = expression(italic(x)), ylab = expression(hat(italic(y))),
+#      main = title, lwd = 2, col = "blue", cex.lab = 1.25, cex.main = 1.5)
+# 
+# ## reduce model
+# 
+# mod3 <- lm(fs~(c + di)*tav)
+# 
+# summary(mod3)
+# summary(mod3)$coefficient
 
 
 # Model exploration: GLM --------------------------------------------------
-head(sizeSync)
-fs <- sizeSync$Sync ## functional synchrony
 
-d <- (sizeSync$Euclid_Dist_Meters)/1000 ## distance in KM
 
-c <- sizeSync$Connectivity
-
-dv <- sizeSync$diversity
-
-di <- sizeSync$distance
-
-tav <- sizeSync$annual_avg
-
-## use non transformed data
-data <- cbind(fs,d,c,dv,di,tav)
-
-## or transformed 
-head(data_log)
-
-data <- as.data.frame(data)
-head(data)
-
-mod <- glm(fs~(c+dv+di)*tav ,data=data,family=Gamma(link = "log"))
+mod <- glm(fs~(d+c+dv_Norm+di_Norm)*tav, data = sizeSyncEULog,family=Gamma(link = "log"))
 
 summary(mod)
 anova(mod)
@@ -325,62 +420,62 @@ summary(mod)$coefficient ## functional diversity, av temp and interaction of fun
 require(flexplot)
 ?flexplot
 ## distirbution
-flexplot(fs~1, data=data)
+flexplot(fs~1, data=sizeSyncEULog)
 
 ##gamma plot - this bins diversity which i don't think we want
-flexplot(fs ~ di+dv+tav|c, data=data, method = "Gamma")
+flexplot(fs ~ d+di_Norm+c|tav, data=sizeSyncEULog, method = "Gamma")
 
 # full model 
-mod <- glm(fs~(c+dv+di)*tav ,data=data,family=Gamma(link = "log"))
+mod <- glm(fs~(d+c+di_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod)
 # anova(mod)
 
 
 ## connectivity and av temp just to check
-mod0 <- glm(fs~c*tav ,data=data,family=Gamma(link = "log"))
-summary(mod0) ## reduced  
+mod0 <- glm(fs~c*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod0) 
 # anova(mod)
 
 ## remove connectivity
-mod2 <- glm(fs~(dv+di)*tav ,data=data,family=Gamma(link = "log"))
-summary(mod2)
+mod2 <- glm(fs~(dv+di)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod2) 
 anova(mod2)
 
 ## remove func distance
-mod3 <- glm(fs~(dv)*tav ,data=data,family=Gamma(link = "log"))
+mod3 <- glm(fs~(dv)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod3)
 anova(mod3)
 
 ## func distance and av temp
-mod4 <- glm(fs~(di)*tav ,data=data,family=Gamma(link = "log"))
+mod4 <- glm(fs~(di)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod4)  ## AIC drastically reduced - this might be the best one?!
 anova(mod4)
 
-mod4a <- glm(fs~(di+c)*tav ,data=data,family=Gamma(link = "log"))
+mod4a <- glm(fs~(di+c)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod4a)  ## AIC drastically reduced - similar to mod4, maybe this is the best one?
 anova(mod4a)
 
 ## only av temp
-mod5 <- glm(fs~tav ,data=data,family=Gamma(link = "log"))
+mod5 <- glm(fs~tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod5) ## similar to mod4
 anova(mod5)
 
 ## only distance
-mod6 <- glm(fs~di ,data=data,family=Gamma(link = "log"))
+mod6 <- glm(fs~di ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod6) ## lowest AIC but no interaction
 anova(mod6)
 
 ## only diversity
-mod7 <- glm(fs~dv ,data=data,family=Gamma(link = "log"))
+mod7 <- glm(fs~dv ,data=sizeSyncEULog,family=Gamma(link = "log"))
 summary(mod7) ## AIC way higher with functional diversity
 anova(mod7)
 
 ### compare best models
 
-full <- glm(fs~di*tav ,data=data,family=Gamma(link = "log"))
-reduced <- glm(fs~di ,data=data,family=Gamma(link = "log"))
+full <- glm(fs~di_Norm*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+reduced <- glm(fs~di_Norm ,data=sizeSyncEULog,family=Gamma(link = "log"))
 # ?compare.fits
-compare.fits(fs ~ di | tav , data = data, full, reduced) 
+compare.fits(fs ~ di_Norm | tav , data = sizeSyncEULog, full, reduced) 
 ## synchrony increases with increased temp sync, but doesn't change with only functional distance 
 ## (with logged di = negative relationship)
 
@@ -455,18 +550,18 @@ range(na.omit(data$di))
 library(mgcv)
 
 ## use non transformed data
-head(sizeSync)
-fs <- sizeSync$Sync ## functional synchrony
+head(sizeSyncEU)
+fs <- sizeSyncEU$Sync ## functional synchrony
 
-d <- (sizeSync$Euclid_Dist_Meters)/1000 ## distance in KM
+d <- (sizeSyncEU$Euclid_Dist_Meters)/1000 ## distance in KM
 
-c <- sizeSync$Connectivity
+c <- sizeSyncEU$Connectivity
 
-dv <- sizeSync$diversity
+dv <- sizeSyncEU$diversity
 
-di <- sizeSync$distance
+di <- sizeSyncEU$distance
 
-tav <- sizeSync$annual_avg
+tav <- sizeSyncEU$annual_avg
 
 data <- cbind(fs,d,c,dv,di,tav) ## d = euclidean distance, and not used as it correlates 
 
@@ -577,10 +672,10 @@ data <- data[!is.na(data$fs),]
 
 # set up tuning params
 hyper_grid <- expand.grid(
-  shrinkage = c(0.001, 0.003, 0.005), 
+  shrinkage = c(0.001), 
   interaction.depth = c(5), 
-  n.minobsinnode = c(3, 5, 10), 
-  bag.fraction = c(0.75, 0.8) 
+  n.minobsinnode = c(3), 
+  bag.fraction = c(0.75) 
 )
 
 # double check and view
