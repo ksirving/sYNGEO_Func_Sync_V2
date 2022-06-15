@@ -219,9 +219,9 @@ d <- sizeSyncEU$DistKM <- (sizeSyncEU$Euclid_Dist_Meters)/1000 ## distance in KM
 
 c <- sizeSyncEU$Connectivity
 
-dv <- sizeSyncEU$diversity_Norm
+dv <- sizeSyncEU$diversity
 
-di <- sizeSyncEU$distance_Norm
+di <- sizeSyncEU$distance
 
 tav <- sizeSyncEU$annual_avg
 
@@ -311,13 +311,14 @@ anova(mod1) ### all significant
 mod2 <- lm(fs~(d+c+dv_Norm+di_Norm)*tav, data = sizeSyncEULog)
 
 summary(mod2) ## all significant, except functional diversity
+
 anova(mod2) ### all significant, single effects and interactions
 
 
 min(na.omit(sizeSyncEULog$distance))
 max(na.omit(sizeSyncEULog$distance))
 
-## simple figure synchrony over distance - logged values
+## simple figure synchrony over distance - transformed values
 ggplot(data = sizeSyncEULog, aes(y=fs, x=d)) +
   geom_smooth(method = "lm") +
   facet_wrap(~Connectivity) +
@@ -344,7 +345,7 @@ sizeSyncEUlog_long <- sizeSyncEULog %>%
   # mutate(distance_Norm = min_max_norm(distance), diversity_Norm = min_max_norm(diversity)) %>% ## normalise raw distance and diversity
   pivot_longer(c(fs, di_Norm, dv_Norm, tav), values_to = "Values", names_to = "Variables")
 
-ggplot(data = sizeSyncEULog_long, aes(y=Values, x=DistKM, colour = Variables)) +
+ggplot(data = sizeSyncEUlog_long, aes(y=Values, x=DistKM, colour = Variables)) +
   geom_smooth(method = "lm") +
   facet_wrap(~Connectivity) +
   scale_y_continuous(name="Synchrony") +
@@ -426,49 +427,214 @@ flexplot(fs~1, data=sizeSyncEULog)
 flexplot(fs ~ d+di_Norm+c|tav, data=sizeSyncEULog, method = "Gamma")
 
 # full model 
-mod <- glm(fs~(d+c+di_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod)
+mod <- glm(fs~(d+c+di_Norm+dv_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod) # -457326 - lowest so far, 
 # anova(mod)
 
+with(summary(mod), 1 - deviance/null.deviance) ##  0.1372422
+
+## multicolinearlity - remobve interaction terms
+
+moda <- glm(fs~d+c+di_Norm+dv_Norm+tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(moda) # -456495 
+# anova(mod)
+
+check_collinearity(moda) ## all good
 
 ## connectivity and av temp just to check
 mod0 <- glm(fs~c*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod0) 
+summary(mod0) ## -399361
 # anova(mod)
 
 ## remove connectivity
-mod2 <- glm(fs~(dv+di)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod2) 
+mod2 <- glm(fs~(d+dv_Norm+di_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod2) ## -457291 
 anova(mod2)
 
 ## remove func distance
-mod3 <- glm(fs~(dv)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod3)
+mod3 <- glm(fs~(d+dv_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod3) ## -456912 
 anova(mod3)
 
 ## func distance and av temp
-mod4 <- glm(fs~(di)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod4)  ## AIC drastically reduced - this might be the best one?!
+mod4 <- glm(fs~(d+di_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod4)  ## -399444
 anova(mod4)
 
-mod4a <- glm(fs~(di+c)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod4a)  ## AIC drastically reduced - similar to mod4, maybe this is the best one?
+mod4a <- glm(fs~(d+di_Norm+c)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod4a)  ## -399496
 anova(mod4a)
 
 ## only av temp
 mod5 <- glm(fs~tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod5) ## similar to mod4
+summary(mod5) ## -399342
 anova(mod5)
 
 ## only distance
-mod6 <- glm(fs~di ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod6) ## lowest AIC but no interaction
+mod6 <- glm(fs~di_Norm ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod6) ## -398140
 anova(mod6)
 
 ## only diversity
-mod7 <- glm(fs~dv ,data=sizeSyncEULog,family=Gamma(link = "log"))
-summary(mod7) ## AIC way higher with functional diversity
+mod7 <- glm(fs~dv_Norm ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod7) ## -453097
 anova(mod7)
+
+## build from mod7
+mod7a <- glm(fs~dv_Norm+d ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod7a) ## -454633
+
+
+mod7b <- glm(fs~dv_Norm+d+di_Norm ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod7b) ## -455103
+
+mod7c <- glm(fs~c+dv_Norm+d+di_Norm ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod7c) ## -455227
+
+mod7d <- glm(fs~(c+dv_Norm+d+di_Norm)*tav ,data=sizeSyncEULog,family=Gamma(link = "log"))
+summary(mod7d) ## -457326 - full model is the best
+
+
+# Australia models ------------------------------------------------------------
+
+modAU <- lm(Sync~(Connectivity+diversity+DistKM+distance)+annual_avg, data = sizeSyncAU)
+summary(modAU)
+anova(modAU)
+check_collinearity(modAU)
+
+
+head(sizeSyncAU)
+fs <- sizeSyncAU$Sync ## functional synchrony
+
+d <- sizeSyncAU$DistKM <- (sizeSyncAU$Euclid_Dist_Meters)/1000 ## distance in KM
+
+c <- sizeSyncAU$Connectivity
+
+dv <- sizeSyncAU$diversity
+
+di <- sizeSyncAU$distance
+
+tav <- sizeSyncAU$annual_avg
+
+## check distribution, too many points for shapiro wilk 
+# install.packages("e1071")
+library(e1071)
+skewness(na.omit(fs)) ## -0.619 - mod skewed, log transformed not ok
+skewness(d) ## 0.353 - ok, NaN with log, -0.5 with cube root
+skewness(na.omit(dv)) ## 0.3 - ok
+skewness(na.omit(di)) ## 2.69 = highly skewed, with log transform = 0.018
+skewness(na.omit(log(tav+1))) ## -1.235 = highly skewed negative, log makes it worse -1.25, cube root still bad -1.09, sq root bad -1.06
+
+min_max_norm <- function(x) {
+  (x - min(na.omit(x))) / (max(na.omit(x)) - min(na.omit(x)))
+}
+
+## log transform in df
+
+sizeSyncAULog <- sizeSyncAU %>%
+  mutate(fs = log(Sync+1), 
+         d = log(DistKM+1),
+         dv = diversity,
+         di = log(distance+1),
+         tav = annual_avg,
+         c = Connectivity)  %>%
+  mutate(di_Norm = min_max_norm(di), dv_Norm = min_max_norm(dv)) ## normalise diversity & distance
+
+### LM
+## interactions with environmental synchrony
+mod2 <- lm(fs~(d+c+dv_Norm+di_Norm)*tav, data = sizeSyncAULog)
+
+summary(mod2) ## nothing significant
+plot(mod2) ## qq plot heavily tailed
+
+anova(mod2) ### functional diversity & temp & connectivity (mod sig)
+
+### GLM
+
+modglm <- glm(fs~(c+dv_Norm+d+di_Norm)*tav ,data=sizeSyncAULog,family=Gamma(link = "log"))
+summary(modglm) ##  -6050.9, nothing significant
+anova(modglm)
+
+with(summary(modglm), 1 - deviance/null.deviance) ## 0.02763475
+
+modglm <- glm(fs~(c+dv_Norm+d+di_Norm)*tav ,data=sizeSyncAULog,family=Gamma(link = "log"))
+summary(modglm) ##  -6050.9, nothing significant
+anova(modglm)
+
+
+# USA models --------------------------------------------------------------
+
+modUSA <- lm(Sync~(Connectivity+diversity+DistKM+distance), data = sizeSyncUS) ## removed temp 
+summary(modUSA)
+anova(modUSA)
+
+check_collinearity(modUSA) ## high = diversity, temp, mod = distancekm
+
+
+head(sizeSyncUS)
+fs <- sizeSyncUS$Sync ## functional synchrony
+
+d <- sizeSyncUS$DistKM <- (sizeSyncUS$Euclid_Dist_Meters)/1000 ## distance in KM
+
+c <- sizeSyncUS$Connectivity
+
+dv <- sizeSyncUS$diversity
+
+di <- sizeSyncUS$distance
+
+tav <- sizeSyncUS$annual_avg
+
+## check distribution, too many points for shapiro wilk 
+# install.packages("e1071")
+library(e1071)
+skewness(na.omit(fs)) ## -0.281 - mod skewed, log transformed not ok
+skewness(d) ## 0.597 - ok, NaN with log, -0.5 with cube root
+skewness(na.omit(dv)) ## 0.029 - ok
+skewness(na.omit(di)) ## 1.897 = highly skewed, with log transform = 0.018
+skewness(na.omit(log(tav+1))) ## -1.235 = highly skewed negative, log makes it worse -1.25, cube root still bad -1.09, sq root bad -1.06
+
+min_max_norm <- function(x) {
+  (x - min(na.omit(x))) / (max(na.omit(x)) - min(na.omit(x)))
+}
+
+## log transform in df
+
+sizeSyncUSLog <- sizeSyncUS %>%
+  mutate(fs = log(Sync+1), 
+         d = log(DistKM+1),
+         dv = diversity,
+         di = log(distance+1),
+         tav = annual_avg,
+         c = Connectivity)  %>%
+  mutate(di_Norm = min_max_norm(di), dv_Norm = min_max_norm(dv)) ## normalise diversity & distance
+
+### LM
+## interactions with environmental synchrony
+mod2 <- lm(fs~(d+c+dv_Norm+di_Norm), data = sizeSyncUSLog)
+
+summary(mod2) ##  functional diversity, distance, connectivity 
+plot(mod2) ## qq plot heavily tailed
+
+anova(mod2) ### functional diversity, distance, connectivity 
+
+### GLM
+
+modglm <- glm(fs~(c+dv_Norm+d+di_Norm) ,data=sizeSyncUSLog,family=Gamma(link = "log"))
+summary(modglm) ##  -6032.9 - connetivity, distance, functional diversity
+anova(modglm)
+
+with(summary(modglm), 1 - deviance/null.deviance) ## 0.2331024
+
+modglm <- glm(fs~(c+dv_Norm+d) ,data=sizeSyncUSLog,family=Gamma(link = "log"))
+summary(modglm) ##  -6034, 
+anova(modglm)
+
+
+
+
+
+# old (non transformed and non normalised) GLM models comparison ---------------------------------------------------
+
 
 ### compare best models
 
